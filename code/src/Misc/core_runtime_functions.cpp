@@ -11,12 +11,6 @@ void process_input(Window* window, float deltatime)
     if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_Q))
         window->close();
 
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_L))
-        window->setSize(1920, 1080);
-
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_K))
-        window->setSize(width, height);
-
     if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_J))
         isEmitting = !isEmitting;
 
@@ -73,29 +67,31 @@ void initialize_glew()
 
 void configure_opengl()
 {
-    // Configuring OpenGL
+    // DEPTH TESTING
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS); // Passes if the fragment's depth value is less than the stored depth value.
     //glDepthMask(GL_FALSE); // makes the depth buffer read only
 
+    // STENCIL TESTING
     glEnable(GL_STENCIL_TEST);
     //glStencilMask(0xFF); // each bit is written to the stencil buffer as is (performs an AND operation with the bit that is about to be written)
     //glStencilMask(0x00); // each bit ends up as 0 in the stencil buffer (disabling writes)
 
-    // C¯result = C¯source ∗ Fsource + C¯destination ∗ Fdestination
-    // source is the window, destination is whatever is on the color buffer
+    // BLENDING
+    // (Source is the one in the front, destination is whatever is on the color buffer)
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO); // setting options for each of the channels individually
-    glBlendEquation(GL_FUNC_ADD);
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO); // Sets option for both RGB and alpha channels individually
+    glBlendEquation(GL_FUNC_ADD); // C¯result = C¯source ∗ Fsource + C¯destination ∗ Fdestination
 
-    // Enabling Face Culling
+    // FACE CULLING
     glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CCW);
-    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW); // Counter clock wise faces are considered the front faces.
+    glCullFace(GL_BACK); // The face on the back is the one which is thrown away.
 
-    // Tesselation
+    // TESSELATION
     //glPatchParameteri(GL_PATCH_VERTICES, 32); // nº of control points that will be used to construct each patch
 
+    // VIEWPORT
     glViewport(0, 0, width, height);
 }

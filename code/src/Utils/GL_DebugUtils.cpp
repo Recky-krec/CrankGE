@@ -9,14 +9,14 @@ void GLClearError()
 bool GLLogCall(const char* function, const char* file, int line)
 {
     // Returns true if no error was found, false otherwise
-    if(GLenum error = glGetError())
+    if(GLenum error_code = glGetError())
     {
         LOG("[OpenGL Error]: \n");
-        std::cout << std::dec << "\tdec(" << error << ")" << std::endl;
-        std::cout << std::hex << "\thex(0x0" << error << ")" << std::endl;
-        std::cout << "\tpath: " << file << std::endl;
-        std::cout << "\tfunction: " << function << std::endl;
-        std::cout << std::dec <<"\tl: " << line << std::endl;
+        std::cout << std::showbase << std::dec << "\t(" << error_code << ")" << std::endl;
+        std::cout << std::hex                  << "\t(" << error_code << ")" << std::endl;
+        std::cout                              << "\tpath: " << file << std::endl;
+        std::cout                              << "\tfunction: " << function << std::endl;
+        std::cout << std::dec                  << "\tl: " << line << std::endl;
 
         return false;
     }

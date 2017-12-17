@@ -46,12 +46,15 @@ int main()
 	glfwSetScrollCallback(window.getWindowPtr(), scroll_callback);
 
     // Load resources
+    // shaders
     Shader border_shader = ResourceManager::LoadShader("code/shaders/border.vs", "code/shaders/border.fs", nullptr, "border");
 	Shader lamp_shader  = ResourceManager::LoadShader("code/shaders/lamp.vs", "code/shaders/lamp.fs", nullptr, "lamp");
 	Shader model_shader = ResourceManager::LoadShader("code/shaders/model_loading.vs", "code/shaders/model_loading.fs", nullptr, "nanosuit_model");
 
+    // model
     TIME(Model ourModel("assets/sponza/sponza.obj"));
 
+    //textures
     unsigned int box = load_texture("assets/earth.png");
     unsigned int red_window = load_texture("assets/blending_transparent_window.png");
 
@@ -60,19 +63,14 @@ int main()
 	unsigned int cube_VAO;
 	glGenVertexArrays(1, &cube_VAO);
     glBindVertexArray(cube_VAO);
-
     VertexBuffer cube_VBO(cube_vertices, sizeof(cube_vertices));
-
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-
     glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
-
     glBindVertexArray(0);
-
 
     // Buffers for cube with position
 	unsigned int simple_cube_VAO;
@@ -82,17 +80,62 @@ int main()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 	glEnableVertexAttribArray(0);
     glBindVertexArray(0);
+
     // Buffers for quad plane with position
     unsigned int plane_VAO;
     VertexBuffer plane_VBO(plane_vertices, sizeof(plane_vertices));
-
     glGenVertexArrays(1, &plane_VAO);
     glBindVertexArray(plane_VAO);
-
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
+
+    unsigned int fb_texture_rgb, fb_texture_depth, fb_texture_stencil, fb_texture_depth_stencil;
+    glGenTextures(1, &fb_texture_rgb);
+    glBindTexture(GL_TEXTURE_2D, fb_texture_rgb);
+    // allocating memory for a texture with the dimensions of the screen size, ready to be used as a color buffer
+    /* If you want to render your whole screen to a texture of a smaller or larger size you need to call glViewport
+     * again (before rendering to your framebuffer) with the new dimensions of your texture */
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    // allocating memory for a texture to be used as a depth buffer
+    glGenTextures(1, &fb_texture_depth);
+    glBindTexture(GL_TEXTURE_2D, fb_texture_depth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    // allocating memory for a texture to be used as a stencil buffer
+    glGenTextures(1, &fb_texture_stencil);
+    glBindTexture(GL_TEXTURE_2D, fb_texture_stencil);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_STENCIL_INDEX, width, height, 0, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    // allocating memory for a texture that can be used both for depth and stencil
+    glGenTextures(1, &fb_texture_depth_stencil);
+    glBindTexture(GL_TEXTURE_2D, fb_texture_depth_stencil);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    // render buffer objects to be use within the framebuffer
+    // advantages: already in opengl internal format, avoiding to texture conversions
+    // thus making them faster to be written on or to have its data copied to other buffers
+    // cons: write only, we can use glReadPixels() to read from the currently bound frame buffer but
+    // not from the attachment itself
+    unsigned int RBO;
+    glGenRenderbuffers(1, &RBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+    /* Since renderbuffer objects are generally write-only they are often used as depth and stencil attachments,
+     * since most of the time we don't really need to read values from the depth and stencil buffers but still care about depth and stencil testing.
+     * We need the depth and stencil values for testing,
+     * but don't need to sample these values so a renderbuffer object suits this perfectly.
+     * When we're not sampling from these buffers, a renderbuffer object is generally preferred since it's more optimized. */
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 
     while (window.isOpen())
 	{
@@ -112,6 +155,23 @@ int main()
         //std::cout << "(" << camera.getPosition().x << ", " << camera.getPosition().y << ", " << camera.getPosition().z << ")" <<std::endl;
 
 
+        // Framebuffer operations
+        unsigned int FBO;
+        glGenFramebuffers(1, &FBO);
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO); // GL_READ_FRAMEBUFFER, GL_DRAW_FRAMEBUFFER
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb_texture_rgb, 0);
+        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fb_texture_depth, 0);
+        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, fb_texture_stencil, 0);
+        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, fb_texture_depth_stencil, 0);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
+
+        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
+        {
+            std::cout << "Framebuffer was correctly created" << std::endl;
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         glStencilMask(0x00); // make sure we don't update the stencil buffer while drawing the building
         model_shader.enable();
@@ -150,8 +210,8 @@ int main()
         model_shader.SetVector3f("spotLight.position", camera.getPosition());
         model_shader.SetVector3f("spotLight.direction", camera.mFront);
         model_shader.SetVector3f("spotLight.ambient", 0.01f, 0.01f, 0.01f);
-		model_shader.SetVector3f("spotLight.diffuse", 0.8f, 0.8f, 0.8f);
-        model_shader.SetVector3f("spotLight.specular", 1.0f, 1.0f, 1.0f);
+		model_shader.SetVector3f("spotLight.diffuse", 0.4, 0.4f, 0.4f);
+        model_shader.SetVector3f("spotLight.specular", 0.9f, 0.9f, 0.9f);
         model_shader.SetFloat("spotLight.innerCutOff", glm::cos(glm::radians(12.5f)));
         model_shader.SetFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
         model_shader.SetFloat("spotLight.constant", 1.0f);
