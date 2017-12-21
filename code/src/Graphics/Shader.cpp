@@ -1,12 +1,15 @@
 #include "Shader.h"
 
-Shader& Shader::enable()
+namespace crank
 {
-    glUseProgram(this->ID);
+
+Shader& Shader::Enable()
+{
+    glUseProgram(this->Id);
     return *this;
 }
 
-void Shader::compile(const char* vertexSource, const char* fragmentSource, const char* geometrySource)
+void Shader::Compile(const char* vertexSource, const char* fragmentSource, const char* geometrySource)
 {
     unsigned int vertex, fragment, geometry;
 
@@ -17,28 +20,28 @@ void Shader::compile(const char* vertexSource, const char* fragmentSource, const
     glShaderSource(fragment, 1, &fragmentSource, NULL);
 
     glCompileShader(vertex);
-    checkCompileErrors(vertex, "VERTEX");
+    CheckCompileErrors(vertex, "VERTEX");
 
     glCompileShader(fragment);
-    checkCompileErrors(fragment, "FRAGMENT");
+    CheckCompileErrors(fragment, "FRAGMENT");
 
     if(geometrySource != nullptr)
     {
         geometry = glCreateShader(GL_GEOMETRY_SHADER);
         glShaderSource(geometry, 1, &geometrySource, NULL);
         glCompileShader(geometry);
-        checkCompileErrors(geometry, "GEOMETRY");
+        CheckCompileErrors(geometry, "GEOMETRY");
     }
 
-    this->ID = glCreateProgram();
-    glAttachShader(this->ID, vertex);
-    glAttachShader(this->ID, fragment);
+    this->Id = glCreateProgram();
+    glAttachShader(this->Id, vertex);
+    glAttachShader(this->Id, fragment);
 
     if(geometrySource != nullptr)
-        glAttachShader(this->ID, geometry);
+        glAttachShader(this->Id, geometry);
 
-    glLinkProgram(this->ID);
-    checkCompileErrors(this->ID, "PROGRAM");
+    glLinkProgram(this->Id);
+    CheckCompileErrors(this->Id, "PROGRAM");
 
     glDeleteShader(vertex);
     glDeleteShader(fragment);
@@ -47,7 +50,7 @@ void Shader::compile(const char* vertexSource, const char* fragmentSource, const
         glDeleteShader(geometry);
 }
 
-void Shader::checkCompileErrors(int object, std::string type)
+void Shader::CheckCompileErrors(int object, std::string type)
 {
     int success;
     char infoLog[1024];
@@ -57,9 +60,10 @@ void Shader::checkCompileErrors(int object, std::string type)
         if(!success)
         {
             glGetShaderInfoLog(object, 1024, NULL, infoLog);
-            std::cout << "ERROR::Shader: Compile-time error: Type: " << type << "\n"
-                      << infoLog << "\n -- --------------------------------------------------- -- "
-                      << std::endl;
+            LOGEL << "[SHADER]:";
+            LOGE << "Compile-time error: Type: " << type;
+            LOGE << infoLog;
+            LOGE << "-- --------------------------------------------------- -- ";
         }
     }
     else
@@ -68,9 +72,12 @@ void Shader::checkCompileErrors(int object, std::string type)
         if(!success)
         {
             glGetProgramInfoLog(object, 1024, NULL, infoLog);
-            std::cout << "| ERROR::Shader: Link-time error: Type: " << type << "\n"
-                      << infoLog << "\n -- --------------------------------------------------- -- "
-                      << std::endl;
+
+            LOGEL << "[SHADER]:";
+            LOGE << "Link-time error: Type: " << type;
+            LOGE << infoLog;
+            LOGE << "-- --------------------------------------------------- -- ";
+
         }
     }
 }
@@ -78,71 +85,73 @@ void Shader::checkCompileErrors(int object, std::string type)
 void Shader::SetFloat (const char* name, float value, bool useShader)
 {
     if (useShader)
-        this->enable();
+        this->Enable();
 
-    glUniform1f(glGetUniformLocation(this->ID, name), value);
+    glUniform1f(glGetUniformLocation(this->Id, name), value);
 }
 
 void Shader::SetInteger (const char* name, int value, bool useShader)
 {
     if (useShader)
-        this->enable();
+        this->Enable();
 
-    glUniform1i(glGetUniformLocation(this->ID, name), value);
+    glUniform1i(glGetUniformLocation(this->Id, name), value);
 }
 
 void Shader::SetVector2f (const char* name, float x, float y, bool useShader)
 {
     if (useShader)
-        this->enable();
+        this->Enable();
 
-    glUniform2f(glGetUniformLocation(this->ID, name), x, y);
+    glUniform2f(glGetUniformLocation(this->Id, name), x, y);
 }
 
 void Shader::SetVector2f (const char* name, const glm::vec2& value, bool useShader)
 {
     if (useShader)
-        this->enable();
+        this->Enable();
 
-    glUniform2f(glGetUniformLocation(this->ID, name), value.x, value.y);
+    glUniform2f(glGetUniformLocation(this->Id, name), value.x, value.y);
 }
 
 void Shader::SetVector3f (const char* name, float x, float y, float z, bool useShader)
 {
     if (useShader)
-        this->enable();
+        this->Enable();
 
-    glUniform3f(glGetUniformLocation(this->ID, name), x, y, z);
+    glUniform3f(glGetUniformLocation(this->Id, name), x, y, z);
 }
 
 void Shader::SetVector3f (const char* name, const glm::vec3& value, bool useShader)
 {
     if (useShader)
-        this->enable();
+        this->Enable();
 
-    glUniform3f(glGetUniformLocation(this->ID, name), value.x, value.y, value.z);
+    glUniform3f(glGetUniformLocation(this->Id, name), value.x, value.y, value.z);
 }
 
 void Shader::SetVector4f (const char* name, float x, float y, float z, float w, bool useShader)
 {
     if (useShader)
-        this->enable();
+        this->Enable();
 
-    glUniform4f(glGetUniformLocation(this->ID, name), x, y, z, w);
+    glUniform4f(glGetUniformLocation(this->Id, name), x, y, z, w);
 }
 
 void Shader::SetVector4f (const char* name, const glm::vec4& value, bool useShader)
 {
     if (useShader)
-        this->enable();
+        this->Enable();
 
-    glUniform4f(glGetUniformLocation(this->ID, name), value.x, value.y, value.z, value.w);
+    glUniform4f(glGetUniformLocation(this->Id, name), value.x, value.y, value.z, value.w);
 }
 
 void Shader::SetMatrix4  (const char* name, const glm::mat4& matrix, bool useShader)
 {
     if (useShader)
-        this->enable();
+        this->Enable();
 
-    glUniformMatrix4fv(glGetUniformLocation(this->ID, name), 1, GL_FALSE, glm::value_ptr(matrix));
+    glUniformMatrix4fv(glGetUniformLocation(this->Id, name), 1, GL_FALSE, glm::value_ptr(matrix));
 }
+
+} // namespace crank

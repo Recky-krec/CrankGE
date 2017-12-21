@@ -15,7 +15,7 @@ float deltaTime;
 double FPSsum;
 double FPSsum_count;
 
-Camera camera;
+crank::Camera camera;
 
 void initialize_globals()
 {

@@ -1,26 +1,29 @@
 #include "Mesh.h"
 
-Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures)
-	: vertices(vertices),
-	  indices(indices),
-	  textures(textures)
+namespace crank
 {
-	setupMesh();
+
+Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures)
+	: Vertices(vertices),
+	  Indices(indices),
+	  Textures(textures)
+{
+    SetupMesh();
 }
 
-void Mesh::setupMesh()
+void Mesh::SetupMesh()
 {
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	glGenVertexArrays(1, &m_vao);
+	glGenBuffers(1, &m_vbo);
+	glGenBuffers(1, &m_ebo);
 
-	glBindVertexArray(VAO);
+	glBindVertexArray(m_vao);
 	
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+	glBufferData(GL_ARRAY_BUFFER, Vertices.size() * sizeof(Vertex), &Vertices[0], GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.size() * sizeof(unsigned int), &Indices[0], GL_STATIC_DRAW);
 
 	// vertex positions
 	glEnableVertexAttribArray(0);
@@ -45,18 +48,18 @@ void Mesh::setupMesh()
 	glBindVertexArray(0);
 }
 
-void Mesh::draw(const Shader& shader)
+void Mesh::Draw(const crank::Shader &shader)
 {
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
 	unsigned int normalNr = 1;
 	unsigned int heightNr = 1;
 
-	for (unsigned int i = 0; i < textures.size(); i++)
+	for (unsigned int i = 0; i < Textures.size(); i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
 		// retrieve texture number (the N in diffuse_textureN)
-		std::string type = textures[i].type;
+		std::string type = Textures[i].type;
 		std::string number;
 
 		if (type == "texture_diffuse")
@@ -71,16 +74,18 @@ void Mesh::draw(const Shader& shader)
 		else if (type == "texture_height")
 			number = std::to_string(heightNr++);
 
-		glUniform1i(glGetUniformLocation(shader.ID, ("material." + type + number).c_str()), i);
+		glUniform1i(glGetUniformLocation(shader.Id, ("material." + type + number).c_str()), i);
 
-		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		glBindTexture(GL_TEXTURE_2D, Textures[i].id);
 	}
 
-	// draw mesh
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	// Draw mesh
+	glBindVertexArray(m_vao);
+	glDrawElements(GL_TRIANGLES, Indices.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 
 	// always good practice to set everything back to defaults once configured.
 	glActiveTexture(GL_TEXTURE0);
 }
+
+} // namespace crank

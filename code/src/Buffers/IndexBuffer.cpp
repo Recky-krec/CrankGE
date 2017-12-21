@@ -1,26 +1,30 @@
 #include "IndexBuffer.h"
 
-IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
-    : m_Count(count)
+namespace crank
 {
-    glGenBuffers(1, &m_BufferID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferID);
+
+IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
+    : m_count(count)
+{
+    glGenBuffers(1, &m_bufferId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferId);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW);
 }
 
 IndexBuffer::~IndexBuffer()
 {
-    glDeleteBuffers(1, &m_BufferID);
+    glDeleteBuffers(1, &m_bufferId);
 }
 
-void IndexBuffer::bind() const
+void IndexBuffer::Bind() const
 {
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferID);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufferId);
 
 }
 
-void IndexBuffer::unbind() const
+void IndexBuffer::Unbind() const
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+} // namespace crank

@@ -6,6 +6,9 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+namespace crank
+{
+
 static const float PITCH = 0.0f;
 static const float YAW = -90.0f;
 static const float SPEED = 2.5f;
@@ -28,35 +31,37 @@ public:
 public:
 	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch = PITCH);
 
-	inline glm::mat4 getViewMatrix() const { return glm::lookAt(mPosition, mPosition + mFront, mUp); }
-	inline float getZoom() const { return mZoom; }
-	inline glm::vec3 getPosition() const { return mPosition; }
+	inline glm::mat4 GetViewMatrix() const { return glm::lookAt(m_position, m_position + Front, m_up); }
+	inline float GetZoom() const { return m_zoom; }
+	inline glm::vec3 GetPosition() const { return m_position; }
 
-	void processKeyboardInput(CameraMovement direction, float dt);
-	void processMouseInput(float xoffset, float yoffset, bool constrainPitch = true);
-	void processMouseScrollInput(float yoffset);
+	void ProcessKeyboardInput(CameraMovement direction, float dt);
+	void ProcessMouseInput(float xoffset, float yoffset, bool constrainPitch = true);
+	void ProcessMouseScrollInput(float yoffset);
 
-	void addSpeed(float speed);
+	void AddSpeed(float speed);
 
 
 private:
-	void updateCameraVectors();
+	void UpdateCameraVectors();
 
 public:
-	glm::vec3 mFront;
+	glm::vec3 Front;
 
 private:
 	// Camera attributes
-	glm::vec3 mPosition;
-	glm::vec3 mRight;
-	glm::vec3 mUp;
-	glm::vec3 mWorldUp;
+	glm::vec3 m_position;
+	glm::vec3 m_right;
+	glm::vec3 m_up;
+	glm::vec3 m_worldUp;
 
 	// Eular angles
-	float mPitch, mYaw;
+	float m_pitch, m_yaw;
 
 	// Camera options
-	float mSpeed;
-	float mSensitivty;
-	float mZoom;
+	float m_speed;
+	float m_sensitivty;
+	float m_zoom;
 };
+
+} // namespace crank

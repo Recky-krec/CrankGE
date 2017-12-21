@@ -17,9 +17,10 @@
 
 #include "Window/Window.h"
 
-#include "Utils/FileUtils.h"
+#include "Utils/Files.h"
 #include "Utils/ResourceManager.h"
-#include "Utils/GL_DebugUtils.h"
+#include "Utils/Debug.h"
+#include "Utils/Log.h"
 
 #include "Misc/vertex_data.h"
 #include "Misc/core_runtime_functions.h"
@@ -34,36 +35,40 @@ int main()
 		return -1;
 
     initialize_globals();
+    crank::Log::Init();
 
-	Window window(width, height, "CrankGE");
-	window.setActive();
-	window.setMouseCursorLocked();
+	crank::Window window(width, height, "CrankGE");
+	window.SetActive();
+	window.SetMouseCursorLocked();
 
     initialize_glew();
     configure_opengl();
 
     // Set callbacks
-	glfwSetScrollCallback(window.getWindowPtr(), scroll_callback);
+	glfwSetScrollCallback(window.GetWindowPtr(), scroll_callback);
 
     // Load resources
     // shaders
-    Shader border_shader = ResourceManager::LoadShader("code/shaders/border.vs", "code/shaders/border.fs", nullptr, "border");
-	Shader lamp_shader  = ResourceManager::LoadShader("code/shaders/lamp.vs", "code/shaders/lamp.fs", nullptr, "lamp");
-	Shader model_shader = ResourceManager::LoadShader("code/shaders/model_loading.vs", "code/shaders/model_loading.fs", nullptr, "nanosuit_model");
+    crank::Shader border_shader = crank::ResourceManager::LoadShader("code/shaders/border.vs", "code/shaders/border.fs", nullptr, "border");
+	crank::Shader lamp_shader  = crank::ResourceManager::LoadShader("code/shaders/lamp.vs", "code/shaders/lamp.fs", nullptr, "lamp");
+	crank::Shader model_shader = crank::ResourceManager::LoadShader("code/shaders/model_loading.vs", "code/shaders/model_loading.fs", nullptr, "nanosuit_model");
+    crank::Shader screen_shader = crank::ResourceManager::LoadShader("code/shaders/framebuffers_screen.vs", "code/shaders/framebuffers_screen.fs", nullptr, "screen_shader");
+    crank::Shader index_quad_shader = crank::ResourceManager::LoadShader("code/shaders/experimental/index_quad.vs", "code/shaders/experimental/index_quad.fs", nullptr, "index_quad");
 
     // model
-    TIME(Model ourModel("assets/sponza/sponza.obj"));
+    TIME(crank::Model ourModel("assets/sponza/sponza.obj"));
+
 
     //textures
-    unsigned int box = load_texture("assets/earth.png");
-    unsigned int red_window = load_texture("assets/blending_transparent_window.png");
+    unsigned int box = crank::loadTexture("assets/earth.png");
+    unsigned int red_window = crank::loadTexture("assets/blending_transparent_window.png");
 
 
 	// Buffers for cube with position, normal and texcoords
 	unsigned int cube_VAO;
 	glGenVertexArrays(1, &cube_VAO);
     glBindVertexArray(cube_VAO);
-    VertexBuffer cube_VBO(cube_vertices, sizeof(cube_vertices));
+    crank::VertexBuffer cube_VBO(cube_vertices, sizeof(cube_vertices));
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
@@ -76,20 +81,40 @@ int main()
 	unsigned int simple_cube_VAO;
 	glGenVertexArrays(1, &simple_cube_VAO);
 	glBindVertexArray(simple_cube_VAO);
-	cube_VBO.bind();
+    cube_VBO.Bind();
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
 	glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
     // Buffers for quad plane with position
     unsigned int plane_VAO;
-    VertexBuffer plane_VBO(plane_vertices, sizeof(plane_vertices));
     glGenVertexArrays(1, &plane_VAO);
     glBindVertexArray(plane_VAO);
+    crank::VertexBuffer plane_VBO(plane_vertices, sizeof(plane_vertices));
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
+    // Buffers for screen quad
+    unsigned int screen_quad_VAO;
+    glGenVertexArrays(1, &screen_quad_VAO);
+    glBindVertexArray(screen_quad_VAO);
+    crank::VertexBuffer screen_quad_VBO(screen_quad_vertices, sizeof(screen_quad_vertices));
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), 0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glBindVertexArray(0);
+
+    // test quad with index buffer
+    unsigned int test_VAO;
+    glGenVertexArrays(1, &test_VAO);
+    glBindVertexArray(test_VAO);
+    crank::VertexBuffer test_VBO(test, sizeof(test));
+    crank::IndexBuffer test_IBO(test_indices, 6);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), 0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
 
     unsigned int fb_texture_rgb, fb_texture_depth, fb_texture_stencil, fb_texture_depth_stencil;
     glGenTextures(1, &fb_texture_rgb);
@@ -100,6 +125,7 @@ int main()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     // allocating memory for a texture to be used as a depth buffer
     glGenTextures(1, &fb_texture_depth);
@@ -107,6 +133,8 @@ int main()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 
     // allocating memory for a texture to be used as a stencil buffer
     glGenTextures(1, &fb_texture_stencil);
@@ -114,6 +142,8 @@ int main()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_STENCIL_INDEX, width, height, 0, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 
     // allocating memory for a texture that can be used both for depth and stencil
     glGenTextures(1, &fb_texture_depth_stencil);
@@ -121,6 +151,8 @@ int main()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 
     // render buffer objects to be use within the framebuffer
     // advantages: already in opengl internal format, avoiding to texture conversions
@@ -136,13 +168,35 @@ int main()
      * but don't need to sample these values so a renderbuffer object suits this perfectly.
      * When we're not sampling from these buffers, a renderbuffer object is generally preferred since it's more optimized. */
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-    while (window.isOpen())
+
+    // Framebuffer operations
+    unsigned int FBO;
+    glGenFramebuffers(1, &FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO); // GL_READ_FRAMEBUFFER, GL_DRAW_FRAMEBUFFER
+
+    glBindTexture(GL_TEXTURE_2D, fb_texture_rgb);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb_texture_rgb, 0);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fb_texture_depth, 0);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, fb_texture_stencil, 0);
+    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, fb_texture_depth_stencil, 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        //crank::Log::ReportingLevel(crank::Log::ERROR);
+        LOGE << "FRAMEBUFFER: Framebuffer is not complete!";
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
+    while (window.IsOpen())
 	{
-		glClearColor(0.5f, 0.8f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-		currentFrame = glfwGetTime();
+        currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
         process_input(&window, deltaTime);
@@ -152,40 +206,26 @@ int main()
         FPSsum += 1/deltaTime;
         FPSsum_count += 1;
         // debugging
-        //std::cout << "(" << camera.getPosition().x << ", " << camera.getPosition().y << ", " << camera.getPosition().z << ")" <<std::endl;
+        //std::cout << "(" << camera.getPosition().x << ", " << camera.getPosition().y << ", " << camera.GetPosition().z << ")" <<std::endl;
 
-
-        // Framebuffer operations
-        unsigned int FBO;
-        glGenFramebuffers(1, &FBO);
-        glBindFramebuffer(GL_FRAMEBUFFER, FBO); // GL_READ_FRAMEBUFFER, GL_DRAW_FRAMEBUFFER
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb_texture_rgb, 0);
-        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fb_texture_depth, 0);
-        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, fb_texture_stencil, 0);
-        //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, fb_texture_depth_stencil, 0);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
-
-        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
-        {
-            std::cout << "Framebuffer was correctly created" << std::endl;
-        }
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+        glEnable(GL_DEPTH_TEST);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         glStencilMask(0x00); // make sure we don't update the stencil buffer while drawing the building
-        model_shader.enable();
+        model_shader.Enable();
 		glm::mat4 model;
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
 		model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// it's a bit too big for our scene, so scale it down
 
-		glm::mat4 projection = glm::perspective(glm::radians(camera.getZoom()), width / height, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), width / height, 0.1f, 100.0f);
 
         model_shader.SetMatrix4("model", model);
-        model_shader.SetMatrix4("view", camera.getViewMatrix());
+        model_shader.SetMatrix4("view", camera.GetViewMatrix());
         model_shader.SetMatrix4("projection", projection);
 
-        model_shader.SetVector3f("viewPos", camera.getPosition());
+        model_shader.SetVector3f("viewPos", camera.GetPosition());
         model_shader.SetFloat("material.shininess", 32.0f);
 
         // Point light 0
@@ -207,8 +247,8 @@ int main()
         model_shader.SetFloat("pointLights[1].quadratic", 0.032f);
 
 		// Spotlight 0
-        model_shader.SetVector3f("spotLight.position", camera.getPosition());
-        model_shader.SetVector3f("spotLight.direction", camera.mFront);
+        model_shader.SetVector3f("spotLight.position", camera.GetPosition());
+        model_shader.SetVector3f("spotLight.direction", camera.Front);
         model_shader.SetVector3f("spotLight.ambient", 0.01f, 0.01f, 0.01f);
 		model_shader.SetVector3f("spotLight.diffuse", 0.4, 0.4f, 0.4f);
         model_shader.SetVector3f("spotLight.specular", 0.9f, 0.9f, 0.9f);
@@ -227,10 +267,26 @@ int main()
 
 		// Draw call
         //glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
-        ourModel.draw(model_shader);
+        ourModel.Draw(model_shader);
+
+        // ----------------------- test quad -------------------------
+
+        glDisable(GL_CULL_FACE);
+        index_quad_shader.Enable();
+        glBindVertexArray(test_VAO);
+        model = glm::mat4();
+        model = glm::translate(model, glm::vec3(1.5, 1.5, 1.5));
+        model = glm::scale(model, glm::vec3(2.0, 2.0, 2.0));
+        index_quad_shader.SetMatrix4("model", model);
+        index_quad_shader.SetMatrix4("view", camera.GetViewMatrix());
+        index_quad_shader.SetMatrix4("projection", projection);
+        GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);)
+        glEnable(GL_CULL_FACE);
+
+
 
         // -------------- ON THE FIELD POINT LIGHT -----------------
-        border_shader.enable();
+        border_shader.Enable();
 
         glBindVertexArray(cube_VAO);
 
@@ -241,7 +297,7 @@ int main()
             model = glm::scale(model, glm::vec3(0.15f, 0.15f, 0.15f));
 
             border_shader.SetMatrix4("model", model);
-            border_shader.SetMatrix4("view", camera.getViewMatrix());
+            border_shader.SetMatrix4("view", camera.GetViewMatrix());
             border_shader.SetMatrix4("projection", projection);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -250,12 +306,12 @@ int main()
         // RED WINDOWS:
         glDisable(GL_CULL_FACE);
         glBindVertexArray(cube_VAO);
-        lamp_shader.enable();
+        lamp_shader.Enable();
 
         std::map<float, glm::vec3> sortedWindowPositions;
         for(int i = 1; i < 4; i++)
         {
-            float distance = glm::length(camera.getPosition() - plane_positions[i]);
+            float distance = glm::length(camera.GetPosition() - plane_positions[i]);
             sortedWindowPositions[distance] = plane_positions[i];
         }
 
@@ -266,7 +322,7 @@ int main()
             model = glm::rotate(model, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
             model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
             lamp_shader.SetMatrix4("model", model);
-            lamp_shader.SetMatrix4("view", camera.getViewMatrix());
+            lamp_shader.SetMatrix4("view", camera.GetViewMatrix());
             lamp_shader.SetMatrix4("projection", projection);
             lamp_shader.SetVector3f("glassColor", 1.0f, 1.0f, 1.0f);
             lamp_shader.SetInteger("texture_0", 0);
@@ -280,12 +336,12 @@ int main()
 
 
         // -------------- REFLECTIVE GROUND -----------------
-
+/*
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); // Only updates buffer stored stencil value with reference value if both depth and stencil tests pass.
         glStencilFunc(GL_ALWAYS, 1, 0xFF); // Test to be drawn: Always. Fragments should update the stencil buffer
         glStencilMask(0xFF);  // enable writing to the stencil buffer
 
-        lamp_shader.enable();
+        lamp_shader.Enable();
         model = glm::mat4();
         model = glm::translate(model, cube_positions[0]);
         model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
@@ -303,7 +359,7 @@ int main()
         glStencilMask(0x00);
         //glDisable(GL_DEPTH_TEST);
 
-        border_shader.enable();
+        border_shader.Enable();
         model = glm::mat4();
         model = glm::translate(model, cube_positions[0]);
         model = glm::scale(model, glm::vec3(0.52f, 0.52f, 0.52f));
@@ -325,7 +381,7 @@ int main()
         glStencilMask(0xFF); // Write to stencil buffer
         glDepthMask(GL_FALSE); // Don't write to depth buffer
 
-        border_shader.enable();
+        border_shader.Enable();
         model = glm::mat4();
         model = glm::translate(model, plane_positions[0]);
         border_shader.SetMatrix4("model", model);
@@ -341,33 +397,45 @@ int main()
         glDepthMask(GL_TRUE);
         glm::vec3 newpos(cube_positions[0].x, cube_positions[0].y - 0.5f, cube_positions[0].z);
 
-        lamp_shader.enable();
+        lamp_shader.Enable();
         model = glm::mat4();
         model = glm::translate(model, newpos);
         model = glm::scale(model , glm::vec3(0.5f, -0.5f, 0.5f));
         lamp_shader.SetMatrix4("model", model);
-        lamp_shader.SetMatrix4("view", camera.getViewMatrix());
+        lamp_shader.SetMatrix4("view", camera.GetViewMatrix());
         lamp_shader.SetMatrix4("projection", projection);
         lamp_shader.SetVector3f("glassColor", 0.5f, 0.5f, 0.5f);
-
-
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, box);
         glBindVertexArray(cube_VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
         glEnable(GL_DEPTH_TEST);
+        glStencilFunc(GL_EQUAL, 0, 0xFF);*/
 
-        glStencilFunc(GL_EQUAL, 0, 0xFF);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDisable(GL_DEPTH_TEST);
+        glClearColor(1.0, 1.0, 1.0, 1.0);
+        glClear( GL_COLOR_BUFFER_BIT );
+        glBindVertexArray(screen_quad_VAO);
+        screen_shader.Enable();
+        glActiveTexture(GL_TEXTURE0);
+        screen_shader.SetInteger("texture1", 0);
+        glBindTexture(GL_TEXTURE_2D, fb_texture_rgb);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
-        window.swapBuffers();
+        window.SwapBuffers();
 		glfwPollEvents();
 	}
 
     std::cout << "Average FPS: " << FPSsum / FPSsum_count << std::endl;
 
-	glfwTerminate();
+
+    crank::ResourceManager::Clear();
+    crank::Log::Flush();
+
+    glfwTerminate();
 	return 0;
 }

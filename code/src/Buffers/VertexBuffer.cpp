@@ -1,25 +1,29 @@
 #include "VertexBuffer.h"
 
+namespace crank
+{
+
 VertexBuffer::VertexBuffer(const void* data, unsigned int size)
 {
-    glGenBuffers(1, &m_BufferID);
-    glBindBuffer(GL_ARRAY_BUFFER, m_BufferID);
+    glGenBuffers(1, &m_bufferId);
+    glBindBuffer(GL_ARRAY_BUFFER, m_bufferId);
     glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 }
 
 VertexBuffer::~VertexBuffer()
 {
-    glDeleteBuffers(1, &m_BufferID);
+    glDeleteBuffers(1, &m_bufferId);
 }
 
-void VertexBuffer::bind() const
+void VertexBuffer::Bind() const
 {
-    glBindBuffer(GL_ARRAY_BUFFER, m_BufferID);
+    glBindBuffer(GL_ARRAY_BUFFER, m_bufferId);
 
 }
 
-void VertexBuffer::unbind() const
+void VertexBuffer::Unbind() const
 {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+} // namespace crank

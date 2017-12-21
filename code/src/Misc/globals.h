@@ -20,7 +20,7 @@ extern bool isLocked;
 extern bool isEmitting;
 extern int isLanternOn;
 
-extern Camera camera;
+extern crank::Camera camera;
 
 void initialize_globals();
 

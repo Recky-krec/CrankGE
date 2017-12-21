@@ -9,24 +9,28 @@
 
 #include "Graphics/Mesh.h"
 #include "Graphics/Shader.h"
-#include "Utils/FileUtils.h"
+#include "Utils/Files.h"
+#include "Utils/Log.h"
+
+namespace crank
+{
 
 class Model
 {
 public:
 	Model(const char* path);
-	void draw(const Shader& shader);
+	void Draw(const crank::Shader &shader);
 
 private:
-	void loadModel(std::string path);
-	void processNode(aiNode* node, const aiScene* scene);
-	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
-	
-	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName);
+	void LoadModel(std::string path);
+	void ProcessNode(aiNode *node, const aiScene *scene);
+	crank::Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
 
 private:
-	std::vector<Mesh> meshes;
-	std::vector<Texture> textures_loaded;
-	std::string directory;
+    std::vector<Texture> m_loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
+    std::vector<crank::Mesh> m_meshes;
+	std::vector<Texture> m_texturesLoaded;
+	std::string m_directory;
 };
 
+} // namespace crank

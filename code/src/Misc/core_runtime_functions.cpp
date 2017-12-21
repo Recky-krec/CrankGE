@@ -1,59 +1,59 @@
 #include "core_runtime_functions.h"
 
-void process_input(Window* window, float deltatime)
+void process_input(crank::Window* window, float deltatime)
 {
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_M))
+    if (glfwGetKey(window->GetWindowPtr(), GLFW_KEY_M))
     {
         isLocked = !isLocked;
-        window->setMouseCursorLocked(isLocked);
+        window->SetMouseCursorLocked(isLocked);
     }
 
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_Q))
-        window->close();
+    if (glfwGetKey(window->GetWindowPtr(), GLFW_KEY_Q))
+        window->Close();
 
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_J))
+    if (glfwGetKey(window->GetWindowPtr(), GLFW_KEY_J))
         isEmitting = !isEmitting;
 
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_W))
-        camera.processKeyboardInput(Camera::FORWARD, deltatime);
+    if (glfwGetKey(window->GetWindowPtr(), GLFW_KEY_W))
+        camera.ProcessKeyboardInput(crank::Camera::FORWARD, deltatime);
 
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_S))
-        camera.processKeyboardInput(Camera::BACKWARD, deltatime);
+    if (glfwGetKey(window->GetWindowPtr(), GLFW_KEY_S))
+        camera.ProcessKeyboardInput(crank::Camera::BACKWARD, deltatime);
 
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_A))
-        camera.processKeyboardInput(Camera::LEFT, deltatime);
+    if (glfwGetKey(window->GetWindowPtr(), GLFW_KEY_A))
+        camera.ProcessKeyboardInput(crank::Camera::LEFT, deltatime);
 
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_D))
-        camera.processKeyboardInput(Camera::RIGHT, deltatime);
+    if (glfwGetKey(window->GetWindowPtr(), GLFW_KEY_D))
+        camera.ProcessKeyboardInput(crank::Camera::RIGHT, deltatime);
 
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_R))
-        camera.processKeyboardInput(Camera::UP, deltatime);
+    if (glfwGetKey(window->GetWindowPtr(), GLFW_KEY_R))
+        camera.ProcessKeyboardInput(crank::Camera::UP, deltatime);
 
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_F))
-        camera.processKeyboardInput(Camera::DOWN, deltatime);
+    if (glfwGetKey(window->GetWindowPtr(), GLFW_KEY_F))
+        camera.ProcessKeyboardInput(crank::Camera::DOWN, deltatime);
 
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_B))
+    if (glfwGetKey(window->GetWindowPtr(), GLFW_KEY_B))
         isLanternOn = !isLanternOn;
 
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_UP))
-        camera.addSpeed(1.0f);
+    if (glfwGetKey(window->GetWindowPtr(), GLFW_KEY_UP))
+        camera.AddSpeed(1.0f);
 
-    if (glfwGetKey(window->getWindowPtr(), GLFW_KEY_DOWN))
-        camera.addSpeed(-1.0f);
+    if (glfwGetKey(window->GetWindowPtr(), GLFW_KEY_DOWN))
+        camera.AddSpeed(-1.0f);
 
 
-    glfwGetCursorPos(window->getWindowPtr(), &xpos, &ypos);
+    glfwGetCursorPos(window->GetWindowPtr(), &xpos, &ypos);
     double xoffset = xpos - lastX;
     double yoffset = lastY - ypos;
 
     lastX = xpos;
     lastY = ypos;
-    camera.processMouseInput(xoffset, yoffset);
+    camera.ProcessMouseInput(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    camera.processMouseScrollInput(yoffset);
+    camera.ProcessMouseScrollInput(yoffset);
 }
 
 void initialize_glew()

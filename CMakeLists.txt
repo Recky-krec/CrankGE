@@ -14,7 +14,7 @@ include_directories(dependencies/GLFW/include/)
 include_directories(dependencies/GLM/include/)
 include_directories(dependencies/STB_IMAGE/include/)
 
-add_executable(${PROJECT_NAME} ${myCode} code/src/Misc/vertex_data.h code/src/Misc/globals.h code/src/Misc/core_runtime_functions.cpp code/src/Misc/core_runtime_functions.h code/src/Misc/globals.cpp code/src/Graphics/Renderer.cpp code/src/Graphics/Renderer.h code/src/Buffers/VertexBuffer.cpp code/src/Buffers/VertexBuffer.h code/src/Buffers/IndexBuffer.cpp code/src/Buffers/IndexBuffer.h)
+add_executable(${PROJECT_NAME} ${myCode} code/src/Utils/Time.cpp code/src/Utils/Time.h)
 
 ################# Detect and add OpenGL ########################
 find_package(OpenGL REQUIRED)

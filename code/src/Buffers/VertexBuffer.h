@@ -1,7 +1,10 @@
 #pragma once
 
 #include "GL/glew.h"
-#include "Utils/GL_DebugUtils.h"
+#include "Utils/Debug.h"
+
+namespace crank
+{
 
 class VertexBuffer
 {
@@ -9,10 +12,12 @@ public:
     VertexBuffer(const void* data, unsigned int size);
     ~VertexBuffer();
 
-    void bind() const;
-    void unbind() const;
+    void Bind() const;
+    void Unbind() const;
 
 private:
-    unsigned int m_BufferID;
+    unsigned int m_bufferId;
 
 };
+
+} // namespace crank

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GL/glew.h"
-#include "Utils/GL_DebugUtils.h"
+#include "Utils/Debug.h"
 
 class Renderer
 {

@@ -8,16 +8,20 @@
 
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "Utils/Log.h"
+
+namespace crank
+{
 
 class Shader
 {
 public:
-    unsigned int ID;
+    unsigned int Id;
 
 public:
     Shader() = default;
-    void compile(const char* vertexSource, const char* fragmentSource, const char* geometrySource = nullptr);
-    Shader& enable();
+    void Compile(const char* vertexSource, const char* fragmentSource, const char* geometrySource = nullptr);
+    Shader& Enable();
 
     void SetFloat    (const char* name, float value, bool useShader = false);
     void SetInteger  (const char* name, int value, bool useShader = false);
@@ -30,5 +34,7 @@ public:
     void SetMatrix4  (const char* name, const glm::mat4& matrix, bool useShader = false);
 
 private:
-    void checkCompileErrors(int object, std::string type);
+    void CheckCompileErrors(int object, std::string type);
 };
+
+} // namespace crank

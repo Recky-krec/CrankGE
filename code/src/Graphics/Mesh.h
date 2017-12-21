@@ -10,6 +10,9 @@
 #include <string>
 #include <vector>
 
+namespace crank
+{
+
 struct Vertex
 {
 	glm::vec3 Position;
@@ -30,15 +33,16 @@ class Mesh
 {
 public:
 	Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices, const std::vector<Texture>& textures);
-	void draw(const Shader& shader);
+	void Draw(const crank::Shader &shader);
 
 public:
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
+	std::vector<Vertex> Vertices;
+	std::vector<unsigned int> Indices;
+	std::vector<Texture> Textures;
 
 private:
-	unsigned int VAO, VBO, EBO;
-	void setupMesh();
+	unsigned int m_vao, m_vbo, m_ebo;
+	void SetupMesh();
 };
 
+} // namespace crank

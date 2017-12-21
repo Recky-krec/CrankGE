@@ -2,17 +2,23 @@
 
 #include "GL/glew.h"
 
+namespace crank
+{
+
 class IndexBuffer
 {
+public:
     IndexBuffer(const unsigned int* data, unsigned int count);
     ~IndexBuffer();
 
-    void bind() const;
-    void unbind() const;
+    void Bind() const;
+    void Unbind() const;
 
-    inline unsigned int getCount() const { return m_Count; }
+    inline unsigned int getCount() const { return m_count; }
 
 private:
-    unsigned int m_BufferID;
-    unsigned int m_Count;
+    unsigned int m_bufferId;
+    unsigned int m_count;
 };
+
+} // namespace crank

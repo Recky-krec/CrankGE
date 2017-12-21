@@ -1,19 +1,21 @@
 #include "ResourceManager.h"
 #include "stb/stb_image.h"
 
+namespace crank
+{
 
 // Instantiate static variables
-std::map<std::string, Shader> ResourceManager::Shaders;
+std::map<std::string, crank::Shader> ResourceManager::Shaders;
 //std::map<std::string, Texture2D> ResourceManager::Textures;
 
 
-Shader ResourceManager::LoadShader(const char* vertexPath, const char* fragmentPath, const char* geometryPath, std::string name)
+crank::Shader ResourceManager::LoadShader(const char* vertexPath, const char* fragmentPath, const char* geometryPath, std::string name)
 {
     Shaders[name] = loadShaderFromFile(vertexPath, fragmentPath, geometryPath);
     return Shaders[name];
 }
 
-Shader ResourceManager::GetShader(std::string name)
+crank::Shader ResourceManager::GetShader(std::string name)
 {
     return Shaders[name];
 }
@@ -56,20 +58,21 @@ Texture2D ResourceManager::GetTexture(std::string name)
 }*/
 
 
-Shader ResourceManager::loadShaderFromFile(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+crank::Shader ResourceManager::loadShaderFromFile(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
 {
     std::string vertexCode, fragmentCode, geometryCode;
     try
     {
-        vertexCode = read_file(vertexPath);
-        fragmentCode = read_file(fragmentPath);
+        vertexCode = crank::readFile(vertexPath);
+        fragmentCode = crank::readFile(fragmentPath);
 
         if (geometryPath != nullptr)
-            geometryCode = read_file(geometryPath);
+            geometryCode = crank::readFile(geometryPath);
     }
     catch (std::exception& e)
     {
-        std::cout << "ERROR::SHADER: Failed to read shader files" << e.what() <<  std::endl;
+        //crank::Log::ReportingLevel(crank::Log::ERROR);
+        LOGE << "[ResourceManager]: Failed to read shader files" << e.what() <<  std::endl;
     }
 
     const char* vShaderCode = vertexCode.c_str();
@@ -77,16 +80,18 @@ Shader ResourceManager::loadShaderFromFile(const char* vertexPath, const char* f
     const char* gShaderCode = geometryCode.c_str();
 
     // 2. Now create shader object from source code
-    Shader shader;
-    shader.compile(vShaderCode, fShaderCode, geometryPath != nullptr ? gShaderCode : nullptr);
+    crank::Shader shader;
+    shader.Compile(vShaderCode, fShaderCode, geometryPath != nullptr ? gShaderCode : nullptr);
     return shader;
 }
 
 void ResourceManager::Clear()
 {
     for(auto it : Shaders)
-        glDeleteShader(it.second.ID);
+        glDeleteShader(it.second.Id);
 
     /*for(auto it : Textures)
-        glDeleteTextures(1, &it.second.ID);*/
+        glDeleteTextures(1, &it.second.Id);*/
 }
+
+} // namespace crank

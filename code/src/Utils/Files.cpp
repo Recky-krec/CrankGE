@@ -1,11 +1,17 @@
-#include "FileUtils.h"
-#include "Utils/GL_DebugUtils.h"
+#include "Files.h"
+#include "Utils/Debug.h"
 
-std::string read_file(const std::string& path)
+namespace crank
+{
+std::string readFile(const std::string& path)
 {
 	std::string result;
-	std::ifstream ist(path);
-	if (!ist) { std::cerr << "read_file() FAILED to open: " << path << std::endl; }
+	std::ifstream ist(path, std::ios::in);
+	if (!ist)
+	{
+		//crank::Log::ReportingLevel(crank::Log::ERROR);
+		LOGE << "\t[File]\n\tFailed to open at: " << path << std::endl;
+	}
 
 	std::string line;
 	while (!ist.eof())
@@ -17,7 +23,7 @@ std::string read_file(const std::string& path)
 	return result;
 }
 
-unsigned int load_texture(const std::string& path)
+unsigned int loadTexture(const std::string& path)
 {
 	unsigned int id;
 	glGenTextures(1, &id);
@@ -56,9 +62,12 @@ unsigned int load_texture(const std::string& path)
 	}
 	else
 	{
-		std::cout << "Texture failed to load at path: " << path << std::endl;
+		//crank::Log::ReportingLevel(crank::Log::ERROR);
+		LOGE << "\t[Texture]:\n\tFailed to load at path: " << path << std::endl;
 		stbi_image_free(data);
 	}
 
 	return id;
 }
+
+}  // namespace crank
