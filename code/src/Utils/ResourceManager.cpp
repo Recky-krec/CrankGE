@@ -11,7 +11,7 @@ std::map<std::string, crank::Shader> ResourceManager::Shaders;
 
 crank::Shader ResourceManager::LoadShader(const char* vertexPath, const char* fragmentPath, const char* geometryPath, std::string name)
 {
-    Shaders[name] = loadShaderFromFile(vertexPath, fragmentPath, geometryPath);
+    Shaders[name] = LoadShaderFromFile(vertexPath, fragmentPath, geometryPath);
     return Shaders[name];
 }
 
@@ -58,7 +58,8 @@ Texture2D ResourceManager::GetTexture(std::string name)
 }*/
 
 
-crank::Shader ResourceManager::loadShaderFromFile(const char* vertexPath, const char* fragmentPath, const char* geometryPath)
+crank::Shader ResourceManager::LoadShaderFromFile(const char *vertexPath, const char *fragmentPath,
+                                                  const char *geometryPath)
 {
     std::string vertexCode, fragmentCode, geometryCode;
     try
@@ -71,8 +72,8 @@ crank::Shader ResourceManager::loadShaderFromFile(const char* vertexPath, const 
     }
     catch (std::exception& e)
     {
-        //crank::Log::ReportingLevel(crank::Log::ERROR);
-        LOGE << "[ResourceManager]: Failed to read shader files" << e.what() <<  std::endl;
+        LOGEL << "[RESOURCEMANAGER]";
+        LOGE << "Failed to read shader files" << e.what() <<  std::endl;
     }
 
     const char* vShaderCode = vertexCode.c_str();

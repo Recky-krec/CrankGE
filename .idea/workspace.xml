@@ -12,45 +12,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d2d9dfc9-8902-4da7-a8ef-6c5b4ed78699" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/code/src/Utils/Debug.cpp" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" afterPath="$PROJECT_DIR$/CMakeLists.txt" />
-      <change beforePath="$PROJECT_DIR$/code/shaders/border.fs" afterPath="$PROJECT_DIR$/code/shaders/border.fs" />
-      <change beforePath="$PROJECT_DIR$/code/shaders/border.vs" afterPath="$PROJECT_DIR$/code/shaders/border.vs" />
-      <change beforePath="$PROJECT_DIR$/code/shaders/lamp.fs" afterPath="$PROJECT_DIR$/code/shaders/lamp.fs" />
-      <change beforePath="$PROJECT_DIR$/code/shaders/lamp.vs" afterPath="$PROJECT_DIR$/code/shaders/lamp.vs" />
-      <change beforePath="$PROJECT_DIR$/code/src/Buffers/IndexBuffer.cpp" afterPath="$PROJECT_DIR$/code/src/Buffers/IndexBuffer.cpp" />
-      <change beforePath="$PROJECT_DIR$/code/src/Buffers/IndexBuffer.h" afterPath="$PROJECT_DIR$/code/src/Buffers/IndexBuffer.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/Buffers/VertexBuffer.cpp" afterPath="$PROJECT_DIR$/code/src/Buffers/VertexBuffer.cpp" />
-      <change beforePath="$PROJECT_DIR$/code/src/Buffers/VertexBuffer.h" afterPath="$PROJECT_DIR$/code/src/Buffers/VertexBuffer.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/Graphics/Camera.cpp" afterPath="$PROJECT_DIR$/code/src/Graphics/Camera.cpp" />
-      <change beforePath="$PROJECT_DIR$/code/src/Graphics/Camera.h" afterPath="$PROJECT_DIR$/code/src/Graphics/Camera.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/Graphics/Mesh.cpp" afterPath="$PROJECT_DIR$/code/src/Graphics/Mesh.cpp" />
-      <change beforePath="$PROJECT_DIR$/code/src/Graphics/Mesh.h" afterPath="$PROJECT_DIR$/code/src/Graphics/Mesh.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/Graphics/Model.cpp" afterPath="$PROJECT_DIR$/code/src/Graphics/Model.cpp" />
-      <change beforePath="$PROJECT_DIR$/code/src/Graphics/Model.h" afterPath="$PROJECT_DIR$/code/src/Graphics/Model.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/Graphics/Renderer.h" afterPath="$PROJECT_DIR$/code/src/Graphics/Renderer.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/Graphics/Shader.cpp" afterPath="$PROJECT_DIR$/code/src/Graphics/Shader.cpp" />
-      <change beforePath="$PROJECT_DIR$/code/src/Graphics/Shader.h" afterPath="$PROJECT_DIR$/code/src/Graphics/Shader.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/Misc/core_runtime_functions.cpp" afterPath="$PROJECT_DIR$/code/src/Misc/core_runtime_functions.cpp" />
-      <change beforePath="$PROJECT_DIR$/code/src/Misc/core_runtime_functions.h" afterPath="$PROJECT_DIR$/code/src/Misc/core_runtime_functions.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/Misc/globals.cpp" afterPath="$PROJECT_DIR$/code/src/Misc/globals.cpp" />
-      <change beforePath="$PROJECT_DIR$/code/src/Misc/globals.h" afterPath="$PROJECT_DIR$/code/src/Misc/globals.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/Misc/vertex_data.h" afterPath="$PROJECT_DIR$/code/src/Misc/vertex_data.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/Utils/FileUtils.cpp" afterPath="$PROJECT_DIR$/code/src/Utils/Files.cpp" />
-      <change beforePath="$PROJECT_DIR$/code/src/Utils/FileUtils.h" afterPath="$PROJECT_DIR$/code/src/Utils/Files.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/Utils/GL_DebugUtils.cpp" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/code/src/Utils/GL_DebugUtils.h" afterPath="$PROJECT_DIR$/code/src/Utils/Debug.h" />
       <change beforePath="$PROJECT_DIR$/code/src/Utils/ResourceManager.cpp" afterPath="$PROJECT_DIR$/code/src/Utils/ResourceManager.cpp" />
       <change beforePath="$PROJECT_DIR$/code/src/Utils/ResourceManager.h" afterPath="$PROJECT_DIR$/code/src/Utils/ResourceManager.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/Window/Window.cpp" afterPath="$PROJECT_DIR$/code/src/Window/Window.cpp" />
-      <change beforePath="$PROJECT_DIR$/code/src/Window/Window.h" afterPath="$PROJECT_DIR$/code/src/Window/Window.h" />
-      <change beforePath="$PROJECT_DIR$/code/src/main.cpp" afterPath="$PROJECT_DIR$/code/src/main.cpp" />
-      <change beforePath="$PROJECT_DIR$/dependencies/ASSIMP/include/assimp/material.h" afterPath="$PROJECT_DIR$/dependencies/ASSIMP/include/assimp/material.h" />
-      <change beforePath="$PROJECT_DIR$/dependencies/ASSIMP/include/assimp/mesh.h" afterPath="$PROJECT_DIR$/dependencies/ASSIMP/include/assimp/mesh.h" />
-      <change beforePath="$PROJECT_DIR$/dependencies/GLEW/include/GL/glew.h" afterPath="$PROJECT_DIR$/dependencies/GLEW/include/GL/glew.h" />
-      <change beforePath="$PROJECT_DIR$/dependencies/GLFW/include/GLFW/glfw3native.h" afterPath="$PROJECT_DIR$/dependencies/GLFW/include/GLFW/glfw3native.h" />
-      <change beforePath="$PROJECT_DIR$/dependencies/STB_IMAGE/include/stb/stb_image.h" afterPath="$PROJECT_DIR$/dependencies/STB_IMAGE/include/stb/stb_image.h" />
+      <change beforePath="$PROJECT_DIR$/log.txt" afterPath="$PROJECT_DIR$/log.txt" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -66,7 +30,7 @@
       <file leaf-file-name="main.cpp" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/code/src/main.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
+            <state relative-caret-position="-144">
               <caret line="58" column="16" lean-forward="false" selection-start-line="58" selection-start-column="16" selection-end-line="58" selection-end-column="16" />
               <folding />
             </state>
@@ -167,8 +131,6 @@
         <option value="$PROJECT_DIR$/code/src/Utils/Time.cpp" />
         <option value="$PROJECT_DIR$/code/src/Utils/Log.cpp" />
         <option value="$PROJECT_DIR$/code/src/Utils/Log.h" />
-        <option value="$PROJECT_DIR$/code/src/Utils/ResourceManager.h" />
-        <option value="$PROJECT_DIR$/code/src/Utils/ResourceManager.cpp" />
         <option value="$PROJECT_DIR$/code/src/Utils/Debug.cpp" />
         <option value="$PROJECT_DIR$/code/src/Utils/Debug.h" />
         <option value="$PROJECT_DIR$/code/src/Window/Window.h" />
@@ -189,6 +151,8 @@
         <option value="$PROJECT_DIR$/code/src/Buffers/VertexBuffer.cpp" />
         <option value="$PROJECT_DIR$/code/src/Buffers/IndexBuffer.h" />
         <option value="$PROJECT_DIR$/code/src/Buffers/IndexBuffer.cpp" />
+        <option value="$PROJECT_DIR$/code/src/Utils/ResourceManager.h" />
+        <option value="$PROJECT_DIR$/code/src/Utils/ResourceManager.cpp" />
       </list>
     </option>
   </component>
@@ -237,6 +201,13 @@
               <item name="CrankGE" type="462c0819:PsiDirectoryNode" />
               <item name="code" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="CrankGE" type="dad4c3:CidrFilesViewHelper$MyProjectTreeStructure$1" />
+              <item name="CrankGE" type="462c0819:PsiDirectoryNode" />
+              <item name="code" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="Utils" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -316,17 +287,18 @@
       <workItem from="1513692700645" duration="10238000" />
       <workItem from="1513775577104" duration="6000" />
       <workItem from="1513783980731" duration="23108000" />
-      <workItem from="1513857606872" duration="2149000" />
+      <workItem from="1513857606872" duration="2718000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="152613000" />
+    <option name="totallyTimeSpent" value="153182000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-184" y="208" width="1853" height="1055" extended-state="7" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16351862" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.16351862" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32946146" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
@@ -490,6 +462,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1278">
           <caret line="72" column="21" lean-forward="false" selection-start-line="72" selection-start-column="21" selection-end-line="72" selection-end-column="21" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -518,31 +491,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="432">
           <caret line="33" column="47" lean-forward="false" selection-start-line="33" selection-start-column="47" selection-end-line="33" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/code/src/Utils/Log.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="394">
-          <caret line="40" column="40" lean-forward="true" selection-start-line="40" selection-start-column="40" selection-end-line="40" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/code/src/Utils/ResourceManager.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1710">
-          <caret line="96" column="20" lean-forward="false" selection-start-line="96" selection-start-column="20" selection-end-line="96" selection-end-column="20" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/code/src/Utils/ResourceManager.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="196">
-          <caret line="22" column="49" lean-forward="true" selection-start-line="22" selection-start-column="49" selection-end-line="22" selection-end-column="49" />
-          <folding>
-            <element signature="e#87#107#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -550,6 +499,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="36">
           <caret line="2" column="17" lean-forward="false" selection-start-line="2" selection-start-column="5" selection-end-line="2" selection-end-column="17" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -557,6 +507,10 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="126">
           <caret line="7" column="18" lean-forward="true" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
+          <folding>
+            <element signature="e#34#54#0" expanded="false" />
+            <element signature="e#830#928#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -587,6 +541,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="88">
           <caret line="169" column="33" lean-forward="false" selection-start-line="169" selection-start-column="33" selection-end-line="169" selection-end-column="33" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -710,9 +665,33 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/code/src/Utils/ResourceManager.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="412">
+          <caret line="34" column="94" lean-forward="false" selection-start-line="34" selection-start-column="94" selection-end-line="34" selection-end-column="94" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/code/src/Utils/Log.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="448">
+          <caret line="40" column="40" lean-forward="true" selection-start-line="40" selection-start-column="40" selection-end-line="40" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/code/src/Utils/ResourceManager.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1332">
+          <caret line="75" column="37" lean-forward="false" selection-start-line="75" selection-start-column="37" selection-end-line="75" selection-end-column="37" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/code/src/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
+        <state relative-caret-position="-144">
           <caret line="58" column="16" lean-forward="false" selection-start-line="58" selection-start-column="16" selection-end-line="58" selection-end-column="16" />
           <folding />
         </state>

@@ -32,7 +32,7 @@ public:
     static void Clear();
 
 private:
-    static crank::Shader loadShaderFromFile(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);
+    static crank::Shader LoadShaderFromFile(const char *vertexPath, const char *fragmentPath, const char *geometryPath = nullptr);
     //static Texture2D loadTextureFromFile(const char* file);
 };
 
