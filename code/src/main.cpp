@@ -14,6 +14,8 @@
 
 #include "Buffers/VertexBuffer.h"
 #include "Buffers/IndexBuffer.h"
+#include "Buffers/VertexArray.h"
+#include "Buffers/VertexBufferLayout.h"
 
 #include "Window/Window.h"
 
@@ -31,59 +33,57 @@
 
 int main()
 {
-	if (!glfwInit())
-		return -1;
+    if (!glfwInit())
+        return -1;
 
     initialize_globals();
     crank::Log::Init();
 
-	crank::Window window(width, height, "CrankGE");
-	window.SetActive();
-	window.SetMouseCursorLocked();
+    crank::Window window(width, height, "CrankGE");
+    window.SetActive();
+    window.SetMouseCursorLocked();
 
     initialize_glew();
     configure_opengl();
 
     // Set callbacks
-	glfwSetScrollCallback(window.GetWindowPtr(), scroll_callback);
+    glfwSetScrollCallback(window.GetWindowPtr(), scroll_callback);
 
     // Load resources
     // shaders
     crank::Shader border_shader = crank::ResourceManager::LoadShader("code/shaders/border.vs", "code/shaders/border.fs", nullptr, "border");
-	crank::Shader lamp_shader  = crank::ResourceManager::LoadShader("code/shaders/lamp.vs", "code/shaders/lamp.fs", nullptr, "lamp");
-	crank::Shader model_shader = crank::ResourceManager::LoadShader("code/shaders/model_loading.vs", "code/shaders/model_loading.fs", nullptr, "nanosuit_model");
+    crank::Shader lamp_shader  = crank::ResourceManager::LoadShader("code/shaders/lamp.vs", "code/shaders/lamp.fs", nullptr, "lamp");
+    crank::Shader model_shader = crank::ResourceManager::LoadShader("code/shaders/model_loading.vs", "code/shaders/model_loading.fs", nullptr, "nanosuit_model");
     crank::Shader screen_shader = crank::ResourceManager::LoadShader("code/shaders/framebuffers_screen.vs", "code/shaders/framebuffers_screen.fs", nullptr, "screen_shader");
     crank::Shader index_quad_shader = crank::ResourceManager::LoadShader("code/shaders/experimental/index_quad.vs", "code/shaders/experimental/index_quad.fs", nullptr, "index_quad");
 
     // model
     TIME(crank::Model ourModel("assets/sponza/sponza.obj"));
 
-
     //textures
     unsigned int box = crank::loadTexture("assets/earth.png");
     unsigned int red_window = crank::loadTexture("assets/blending_transparent_window.png");
 
-
-	// Buffers for cube with position, normal and texcoords
-	unsigned int cube_VAO;
-	glGenVertexArrays(1, &cube_VAO);
+    // Buffers for cube with position, normal and texcoords
+    unsigned int cube_VAO;
+    glGenVertexArrays(1, &cube_VAO);
     glBindVertexArray(cube_VAO);
     crank::VertexBuffer cube_VBO(cube_vertices, sizeof(cube_vertices));
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(0);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
     glBindVertexArray(0);
 
     // Buffers for cube with position
-	unsigned int simple_cube_VAO;
-	glGenVertexArrays(1, &simple_cube_VAO);
-	glBindVertexArray(simple_cube_VAO);
+    unsigned int simple_cube_VAO;
+    glGenVertexArrays(1, &simple_cube_VAO);
+    glBindVertexArray(simple_cube_VAO);
     cube_VBO.Bind();
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
-	glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
+    glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
     // Buffers for quad plane with position
@@ -107,14 +107,19 @@ int main()
     glBindVertexArray(0);
 
     // test quad with index buffer
-    unsigned int test_VAO;
-    glGenVertexArrays(1, &test_VAO);
-    glBindVertexArray(test_VAO);
+    //unsigned int test_VAO;
+    //glGenVertexArrays(1, &test_VAO);
+    //glBindVertexArray(test_VAO);
+
+    crank::VertexArray test_VAO;
     crank::VertexBuffer test_VBO(test, sizeof(test));
+
+    crank::VertexBufferLayout<void> layout;
+    layout.Push<float>(3);
+    test_VAO.AddBuffer(test_VBO, layout);
+
     crank::IndexBuffer test_IBO(test_indices, 6);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), 0);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
+    test_VAO.Unbind();
 
     unsigned int fb_texture_rgb, fb_texture_depth, fb_texture_stencil, fb_texture_depth_stencil;
     glGenTextures(1, &fb_texture_rgb);
@@ -186,7 +191,6 @@ int main()
 
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
     {
-        //crank::Log::ReportingLevel(crank::Log::ERROR);
         LOGE << "FRAMEBUFFER: Framebuffer is not complete!";
     }
 
@@ -195,10 +199,10 @@ int main()
 
 
     while (window.IsOpen())
-	{
+    {
         currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
         process_input(&window, deltaTime);
 
         // output fps: deltaTime * FPS = 1second
@@ -215,11 +219,11 @@ int main()
 
         glStencilMask(0x00); // make sure we don't update the stencil buffer while drawing the building
         model_shader.Enable();
-		glm::mat4 model;
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// it's a bit too big for our scene, so scale it down
+        glm::mat4 model;
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// it's a bit too big for our scene, so scale it down
 
-		glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), width / height, 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), width / height, 0.1f, 100.0f);
 
         model_shader.SetMatrix4("model", model);
         model_shader.SetMatrix4("view", camera.GetViewMatrix());
@@ -239,18 +243,18 @@ int main()
 
         // Point light 1
         model_shader.SetVector3f("pointLights[1].position", point_light_positions[1]);
-		model_shader.SetVector3f("pointLights[1].ambient", 0.02f, 0.02f, 0.02f);
-		model_shader.SetVector3f("pointLights[1].diffuse", 0.15f, 0.15f, 0.15f);
+        model_shader.SetVector3f("pointLights[1].ambient", 0.02f, 0.02f, 0.02f);
+        model_shader.SetVector3f("pointLights[1].diffuse", 0.15f, 0.15f, 0.15f);
         model_shader.SetVector3f("pointLights[1].specular", 0.80f, 0.80f, 0.80f);
         model_shader.SetFloat("pointLights[1].constant", 1.0f);
         model_shader.SetFloat("pointLights[1].linear", 0.09f);
         model_shader.SetFloat("pointLights[1].quadratic", 0.032f);
 
-		// Spotlight 0
+        // Spotlight 0
         model_shader.SetVector3f("spotLight.position", camera.GetPosition());
         model_shader.SetVector3f("spotLight.direction", camera.Front);
         model_shader.SetVector3f("spotLight.ambient", 0.01f, 0.01f, 0.01f);
-		model_shader.SetVector3f("spotLight.diffuse", 0.4, 0.4f, 0.4f);
+        model_shader.SetVector3f("spotLight.diffuse", 0.4, 0.4f, 0.4f);
         model_shader.SetVector3f("spotLight.specular", 0.9f, 0.9f, 0.9f);
         model_shader.SetFloat("spotLight.innerCutOff", glm::cos(glm::radians(12.5f)));
         model_shader.SetFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
@@ -265,7 +269,7 @@ int main()
         model_shader.SetVector3f("dirLight.diffuse", 0.50f, 0.50f, 0.50f);
         model_shader.SetVector3f("dirLight.specular", 1.0f, 1.0f, 1.0f);
 
-		// Draw call
+        // Draw call
         //glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
         ourModel.Draw(model_shader);
 
@@ -273,7 +277,7 @@ int main()
 
         glDisable(GL_CULL_FACE);
         index_quad_shader.Enable();
-        glBindVertexArray(test_VAO);
+        test_VAO.Bind();
         model = glm::mat4();
         model = glm::translate(model, glm::vec3(1.5, 1.5, 1.5));
         model = glm::scale(model, glm::vec3(2.0, 2.0, 2.0));
@@ -282,7 +286,6 @@ int main()
         index_quad_shader.SetMatrix4("projection", projection);
         GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);)
         glEnable(GL_CULL_FACE);
-
 
 
         // -------------- ON THE FIELD POINT LIGHT -----------------
@@ -427,8 +430,8 @@ int main()
 
 
         window.SwapBuffers();
-		glfwPollEvents();
-	}
+        glfwPollEvents();
+    }
 
     std::cout << "Average FPS: " << FPSsum / FPSsum_count << std::endl;
 
@@ -437,5 +440,5 @@ int main()
     crank::Log::Flush();
 
     glfwTerminate();
-	return 0;
+    return 0;
 }

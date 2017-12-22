@@ -14,8 +14,7 @@ include_directories(dependencies/GLFW/include/)
 include_directories(dependencies/GLM/include/)
 include_directories(dependencies/STB_IMAGE/include/)
 
-add_executable(${PROJECT_NAME} ${myCode} code/src/Utils/Time.cpp code/src/Utils/Time.h)
-
+add_executable(${PROJECT_NAME} ${myCode})
 ################# Detect and add OpenGL ########################
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})

@@ -1,7 +1,7 @@
 *======= CrankGE LOG =======*
 
 Level => logINFO
-	13:17:04 [TIME]:
-	13:17:04	Starting time: 0.103091
-	13:17:04	Call to: 'crank::Model ourModel("assets/sponza/sponza.obj")'
-	13:17:10	Ending time: 5.41901
+	23:14:17 [TIME]:
+	23:14:17	Starting time: 0.0976853
+	23:14:17	Call to: 'crank::Model ourModel("assets/sponza/sponza.obj")'
+	23:14:22	Ending time: 5.32901

@@ -9,8 +9,8 @@ std::string readFile(const std::string& path)
 	std::ifstream ist(path, std::ios::in);
 	if (!ist)
 	{
-		//crank::Log::ReportingLevel(crank::Log::ERROR);
-		LOGE << "\t[File]\n\tFailed to open at: " << path << std::endl;
+		LOGEL << "[FILE]:";
+		LOGE << "Failed to open at: " << path;
 	}
 
 	std::string line;
@@ -21,6 +21,89 @@ std::string readFile(const std::string& path)
 	}
 
 	return result;
+}
+
+void copyFileByte(const std::string& src, const std::string& destination)
+{
+    // 100s for 4.3GB file
+	std::ifstream ifs(src, std::ios_base::binary);
+	std::ofstream ofs(destination, std::ios_base::binary);
+
+	if(!ifs) {
+		LOGEL << "[FILE]:";
+		LOGE << "Failed to open at: " << src;
+	} if(!ofs) {
+		LOGEL << "[FILE]:";
+		LOGE << "Failed to open at: " << destination;
+	}
+
+    ifs.seekg(0, ifs.end);
+    long long length = ifs.tellg();
+    ifs.seekg(0, ifs.beg);
+
+	std::vector<int> v;
+    v.reserve(length);
+
+    LOGIL << "[FILE]";
+    LOGI << "Reading " << length << " characters... ";
+
+    // read from binary file
+    for(int x; ifs.read(asBytes(x), sizeof(int)); )
+		v.push_back(x);
+
+    if(ifs)
+        LOGI << "all characters read successfully.";
+    else
+    {
+        LOGEL << "[ERROR]";
+        LOGE << "Only " << ifs.gcount() << " could be read";
+    }
+
+	// write to binary file
+	for(int x : v)
+		ofs.write(asBytes(x), sizeof(x));
+}
+
+void copyFileBlock(const std::string& src, const std::string& destination)
+{
+    // 80s for 4.3GB file
+    std::ifstream ifs(src, std::ios_base::binary);
+    std::ofstream ofs(destination, std::ios_base::binary);
+
+	if(!ifs) {
+		LOGEL << "[FILE]:";
+		LOGE << "Failed to open at: " << src;
+	} if(!ofs) {
+		LOGEL << "[FILE]:";
+		LOGE << "Failed to open at: " << destination;
+	}
+
+    ifs.seekg(0, ifs.end);
+    long long length = ifs.tellg();
+    ifs.seekg(0, ifs.beg);
+
+    char* buffer = new char [length];
+
+    LOGIL << "[FILE]";
+    LOGI << "Reading " << length << " characters... ";
+    ifs.read(buffer, length);
+
+    if(ifs)
+        LOGI << "all characters read successfully.";
+    else
+    {
+        LOGEL << "[ERROR]";
+        LOGE << "Only " << ifs.gcount() << " could be read";
+    }
+
+    ofs.write(buffer, length);
+}
+
+template<typename T>
+char* asBytes(T& var)
+{
+	void* addr = &var;
+	return static_cast<char*>(addr);
 }
 
 unsigned int loadTexture(const std::string& path)
@@ -62,8 +145,8 @@ unsigned int loadTexture(const std::string& path)
 	}
 	else
 	{
-		//crank::Log::ReportingLevel(crank::Log::ERROR);
-		LOGE << "\t[Texture]:\n\tFailed to load at path: " << path << std::endl;
+		LOGEL << "[TEXTURE]:";
+		LOGE << "Failed to load at path: " << path;
 		stbi_image_free(data);
 	}
 
