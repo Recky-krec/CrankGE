@@ -3,7 +3,7 @@
 #include "glm/glm.hpp"
 
 // Counter Clock Wise defined Vertices (enhanced for culling)
-float cube_vertices[] = {
+float cubeVertices[] = {
         // Positions          // Normals           // Texture Coords
         // Back face
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
@@ -50,7 +50,7 @@ float cube_vertices[] = {
 };
 
 // Counter Clock Wise defined Vertices (enhanced for culling)
-float plane_vertices[] = {
+float planeVertices[] = {
         0.5f,  0.5f, -0.5f,
         -0.5f,  0.5f, -0.5f,
         0.5f,  0.5f,  0.5f,
@@ -72,7 +72,7 @@ unsigned int test_indices[] =
                 0, 2, 3
         };
 
-float screen_quad_vertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+float screenQuadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
         // positions   // texCoords
         -1.0f,  1.0f,  0.0f, 1.0f,
         -1.0f, -1.0f,  0.0f, 0.0f,

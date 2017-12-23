@@ -15,7 +15,7 @@ public:
     void Bind();
     void Unbind();
 
-    void AddBuffer(const crank::VertexBuffer& vb, const crank::VertexBufferLayout<void>& layout);
+    void AddBuffer(const crank::VertexBuffer& vb, const crank::VertexBufferLayout& layout);
 
 private:
     unsigned int m_bufferId;

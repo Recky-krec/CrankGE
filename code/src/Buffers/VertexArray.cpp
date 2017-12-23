@@ -1,4 +1,5 @@
 #include "VertexArray.h"
+#include "VertexBufferLayout.h"
 
 namespace crank
 {
@@ -24,17 +25,20 @@ void VertexArray::Unbind()
     glBindVertexArray(0);
 }
 
-void VertexArray::AddBuffer(const crank::VertexBuffer& vb, const crank::VertexBufferLayout<void>& layout)
+void VertexArray::AddBuffer(const crank::VertexBuffer& vb, const crank::VertexBufferLayout& layout)
 {
     vb.Bind();
     auto& elements = layout.GetElements();
     unsigned int offset = 0;
 
-    for(int i = 0; i < elements.size() - 1; i++)
+    for(int index = 0; index <= elements.size() - 1; index++)
     {
-        glVertexAttribPointer(i, elements[i].Count, elements[i].Type, /*elements[i].Normalized*/GL_FALSE, layout.GetStride(), (const void*)(offset));
-        glEnableVertexAttribArray(i);
-        offset += elements[i].Count * 4;//sizeof(elements[i].Type);
+        auto& element = elements[index];
+
+        glVertexAttribPointer(index, element.Count, element.Type, element.Normalized, layout.GetStride(), (const void*)(offset));
+        glEnableVertexAttribArray(index);
+
+        offset += element.Count * LayoutElement::GetSizeOfType(element.Type);
     }
 }
 

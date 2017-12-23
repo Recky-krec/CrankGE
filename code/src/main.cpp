@@ -60,66 +60,55 @@ int main()
     // model
     TIME(crank::Model ourModel("assets/sponza/sponza.obj"));
 
-    //textures
+    // textures
     unsigned int box = crank::loadTexture("assets/earth.png");
     unsigned int red_window = crank::loadTexture("assets/blending_transparent_window.png");
 
     // Buffers for cube with position, normal and texcoords
-    unsigned int cube_VAO;
-    glGenVertexArrays(1, &cube_VAO);
-    glBindVertexArray(cube_VAO);
-    crank::VertexBuffer cube_VBO(cube_vertices, sizeof(cube_vertices));
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-    glBindVertexArray(0);
+    crank::VertexArray cubeVao;
+    crank::VertexBuffer cubeVbo(cubeVertices, sizeof(cubeVertices));
+    crank::VertexBufferLayout cLayout;
+    cLayout.Push<float>(3);
+    cLayout.Push<float>(3);
+    cLayout.Push<float>(2);
+    cubeVao.AddBuffer(cubeVbo, cLayout);
+    cubeVao.Unbind();
 
     // Buffers for cube with position
-    unsigned int simple_cube_VAO;
-    glGenVertexArrays(1, &simple_cube_VAO);
-    glBindVertexArray(simple_cube_VAO);
-    cube_VBO.Bind();
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), 0);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
+    crank::VertexArray simpleCubeVao;
+    cubeVbo.Bind();
+    crank::VertexBufferLayout scLayout;
+    scLayout.Push<float>(3);
+    simpleCubeVao.AddBuffer(cubeVbo, scLayout);
+    simpleCubeVao.Unbind();
 
-    // Buffers for quad plane with position
-    unsigned int plane_VAO;
-    glGenVertexArrays(1, &plane_VAO);
-    glBindVertexArray(plane_VAO);
-    crank::VertexBuffer plane_VBO(plane_vertices, sizeof(plane_vertices));
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
+    // Buffers for quad plane, horizontal (reflection plane)
+    crank::VertexArray planeVao;
+    crank::VertexBuffer planeVbo(planeVertices, sizeof(planeVertices));
+    crank::VertexBufferLayout pLayout;
+    pLayout.Push<float>(3);
+    planeVao.AddBuffer(planeVbo, pLayout);
+    planeVao.Unbind();
 
     // Buffers for screen quad
-    unsigned int screen_quad_VAO;
-    glGenVertexArrays(1, &screen_quad_VAO);
-    glBindVertexArray(screen_quad_VAO);
-    crank::VertexBuffer screen_quad_VBO(screen_quad_vertices, sizeof(screen_quad_vertices));
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), 0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4*sizeof(float), (void*)(2 * sizeof(float)));
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glBindVertexArray(0);
+    crank::VertexArray screenQuadVao;
+    crank::VertexBuffer screenQuadVbo(screenQuadVertices, sizeof(screenQuadVertices));
+    crank::VertexBufferLayout sqLayout;
+    sqLayout.Push<float>(2);
+    sqLayout.Push<float>(2);
+    screenQuadVao.AddBuffer(screenQuadVbo, sqLayout);
+    screenQuadVao.Unbind();
 
-    // test quad with index buffer
-    //unsigned int test_VAO;
-    //glGenVertexArrays(1, &test_VAO);
-    //glBindVertexArray(test_VAO);
+    // Simple test quad
+    crank::VertexArray testVao;
+    crank::VertexBuffer testVbo(test, sizeof(test));
+    crank::IndexBuffer testIbo(test_indices, 6);
+    crank::VertexBufferLayout tLayout;
+    tLayout.Push<float>(3);
+    testVao.AddBuffer(testVbo, tLayout);
+    testVao.Unbind();
 
-    crank::VertexArray test_VAO;
-    crank::VertexBuffer test_VBO(test, sizeof(test));
 
-    crank::VertexBufferLayout<void> layout;
-    layout.Push<float>(3);
-    test_VAO.AddBuffer(test_VBO, layout);
-
-    crank::IndexBuffer test_IBO(test_indices, 6);
-    test_VAO.Unbind();
 
     unsigned int fb_texture_rgb, fb_texture_depth, fb_texture_stencil, fb_texture_depth_stencil;
     glGenTextures(1, &fb_texture_rgb);
@@ -277,7 +266,7 @@ int main()
 
         glDisable(GL_CULL_FACE);
         index_quad_shader.Enable();
-        test_VAO.Bind();
+        testVao.Bind();
         model = glm::mat4();
         model = glm::translate(model, glm::vec3(1.5, 1.5, 1.5));
         model = glm::scale(model, glm::vec3(2.0, 2.0, 2.0));
@@ -291,7 +280,7 @@ int main()
         // -------------- ON THE FIELD POINT LIGHT -----------------
         border_shader.Enable();
 
-        glBindVertexArray(cube_VAO);
+        cubeVao.Bind();
 
         for(int i=0; i<2; i++)
         {
@@ -308,7 +297,8 @@ int main()
 
         // RED WINDOWS:
         glDisable(GL_CULL_FACE);
-        glBindVertexArray(cube_VAO);
+        cubeVao.Bind();
+
         lamp_shader.Enable();
 
         std::map<float, glm::vec3> sortedWindowPositions;
@@ -421,7 +411,7 @@ int main()
         glDisable(GL_DEPTH_TEST);
         glClearColor(1.0, 1.0, 1.0, 1.0);
         glClear( GL_COLOR_BUFFER_BIT );
-        glBindVertexArray(screen_quad_VAO);
+        screenQuadVao.Bind();
         screen_shader.Enable();
         glActiveTexture(GL_TEXTURE0);
         screen_shader.SetInteger("texture1", 0);
