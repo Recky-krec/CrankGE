@@ -41,7 +41,7 @@ int main()
 
     crank::Window window(width, height, "CrankGE");
     window.SetActive();
-    window.SetMouseCursorLocked();
+    //window.SetMouseCursorLocked();
 
     initialize_glew();
     configure_opengl();
@@ -202,6 +202,7 @@ int main()
         //std::cout << "(" << camera.getPosition().x << ", " << camera.getPosition().y << ", " << camera.GetPosition().z << ")" <<std::endl;
 
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+        glDisable(GL_STENCIL_TEST);
         glEnable(GL_DEPTH_TEST);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -259,7 +260,6 @@ int main()
         model_shader.SetVector3f("dirLight.specular", 1.0f, 1.0f, 1.0f);
 
         // Draw call
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_POINT);
         ourModel.Draw(model_shader);
 
         // ----------------------- test quad -------------------------
@@ -273,7 +273,7 @@ int main()
         index_quad_shader.SetMatrix4("model", model);
         index_quad_shader.SetMatrix4("view", camera.GetViewMatrix());
         index_quad_shader.SetMatrix4("projection", projection);
-        GLCALL(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);)
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glEnable(GL_CULL_FACE);
 
 
@@ -329,27 +329,32 @@ int main()
 
 
         // -------------- REFLECTIVE GROUND -----------------
-/*
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); // Only updates buffer stored stencil value with reference value if both depth and stencil tests pass.
-        glStencilFunc(GL_ALWAYS, 1, 0xFF); // Test to be drawn: Always. Fragments should update the stencil buffer
+
+        // First normal cube
+        /*glEnable(GL_STENCIL_TEST);
+        glClear(GL_STENCIL_BUFFER_BIT);
+
         glStencilMask(0xFF);  // enable writing to the stencil buffer
+        glStencilFunc(GL_ALWAYS, 1, 0xFF); // Test to be drawn: Always. Fragments should update the stencil buffer
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); // Only updates buffer stored stencil value with reference value if both depth and stencil tests pass.
 
         lamp_shader.Enable();
         model = glm::mat4();
         model = glm::translate(model, cube_positions[0]);
         model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
         lamp_shader.SetMatrix4("model", model);
-        lamp_shader.SetMatrix4("view", camera.getViewMatrix());
+        lamp_shader.SetMatrix4("view", camera.GetViewMatrix());
         lamp_shader.SetMatrix4("projection", projection);
         lamp_shader.SetVector3f("glassColor", 1.0f, 1.0f, 1.0f);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, box);
-        glBindVertexArray(cube_VAO);
+        cubeVao.Bind();
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF); //  we're only drawing parts of the containers that are not equal to 1
+
         glStencilMask(0x00);
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF); //  we're only drawing parts of the containers that are not equal to 1
         //glDisable(GL_DEPTH_TEST);
 
         border_shader.Enable();
@@ -357,13 +362,17 @@ int main()
         model = glm::translate(model, cube_positions[0]);
         model = glm::scale(model, glm::vec3(0.52f, 0.52f, 0.52f));
         border_shader.SetMatrix4("model", model);
-        border_shader.SetMatrix4("view", camera.getViewMatrix());
+        border_shader.SetMatrix4("view", camera.GetViewMatrix());
         border_shader.SetMatrix4("projection", projection);
-        glBindVertexArray(simple_cube_VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        glStencilMask(0xFF);
+        cubeVao.Bind();
+        glDrawArrays(GL_TRIANGLES, 0, 36);*/
+
+
+
+        /*glStencilMask(0xFF);
         glEnable(GL_DEPTH_TEST);
+
 
         // Plane
         glDisable(GL_CULL_FACE);
@@ -378,10 +387,10 @@ int main()
         model = glm::mat4();
         model = glm::translate(model, plane_positions[0]);
         border_shader.SetMatrix4("model", model);
-        border_shader.SetMatrix4("view", camera.getViewMatrix());
+        border_shader.SetMatrix4("view", camera.GetViewMatrix());
         border_shader.SetMatrix4("projection", projection);
 
-        glBindVertexArray(plane_VAO);
+        planeVao.Bind();
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glEnable(GL_CULL_FACE);
 
@@ -401,23 +410,22 @@ int main()
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, box);
-        glBindVertexArray(cube_VAO);
+        cubeVao.Bind();
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glEnable(GL_DEPTH_TEST);
         glStencilFunc(GL_EQUAL, 0, 0xFF);*/
 
-
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glDisable(GL_DEPTH_TEST);
+        glDisable(GL_STENCIL_TEST);
         glClearColor(1.0, 1.0, 1.0, 1.0);
-        glClear( GL_COLOR_BUFFER_BIT );
+        glClear( GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
         screenQuadVao.Bind();
         screen_shader.Enable();
         glActiveTexture(GL_TEXTURE0);
         screen_shader.SetInteger("texture1", 0);
         glBindTexture(GL_TEXTURE_2D, fb_texture_rgb);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-
 
         window.SwapBuffers();
         glfwPollEvents();
