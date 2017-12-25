@@ -12,8 +12,8 @@ public:
     VertexArray();
     ~VertexArray();
 
-    void Bind();
-    void Unbind();
+    void Bind() const;
+    void Unbind() const;
 
     void AddBuffer(const crank::VertexBuffer& vb, const crank::VertexBufferLayout& layout);
 

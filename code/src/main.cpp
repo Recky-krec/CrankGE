@@ -16,6 +16,9 @@
 #include "Buffers/IndexBuffer.h"
 #include "Buffers/VertexArray.h"
 #include "Buffers/VertexBufferLayout.h"
+#include "Buffers/RenderBuffer.h"
+#include "Buffers/FrameBuffer.h"
+#include "Buffers/TextureBuffer.h"
 
 #include "Window/Window.h"
 
@@ -41,7 +44,7 @@ int main()
 
     crank::Window window(width, height, "CrankGE");
     window.SetActive();
-    //window.SetMouseCursorLocked();
+    window.SetMouseCursorLocked();
 
     initialize_glew();
     configure_opengl();
@@ -108,84 +111,24 @@ int main()
     testVao.AddBuffer(testVbo, tLayout);
     testVao.Unbind();
 
+    
+    // Framebuffer operations
+    crank::RenderBuffer rbo;
+    rbo.Storage(width, height);
+    rbo.Unbind();
 
-
-    unsigned int fb_texture_rgb, fb_texture_depth, fb_texture_stencil, fb_texture_depth_stencil;
-    glGenTextures(1, &fb_texture_rgb);
-    glBindTexture(GL_TEXTURE_2D, fb_texture_rgb);
-    // allocating memory for a texture with the dimensions of the screen size, ready to be used as a color buffer
-    /* If you want to render your whole screen to a texture of a smaller or larger size you need to call glViewport
-     * again (before rendering to your framebuffer) with the new dimensions of your texture */
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    // allocating memory for a texture to be used as a depth buffer
-    glGenTextures(1, &fb_texture_depth);
-    glBindTexture(GL_TEXTURE_2D, fb_texture_depth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-
-    // allocating memory for a texture to be used as a stencil buffer
-    glGenTextures(1, &fb_texture_stencil);
-    glBindTexture(GL_TEXTURE_2D, fb_texture_stencil);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_STENCIL_INDEX, width, height, 0, GL_STENCIL_INDEX, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-
-    // allocating memory for a texture that can be used both for depth and stencil
-    glGenTextures(1, &fb_texture_depth_stencil);
-    glBindTexture(GL_TEXTURE_2D, fb_texture_depth_stencil);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, width, height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-
-    // render buffer objects to be use within the framebuffer
-    // advantages: already in opengl internal format, avoiding to texture conversions
-    // thus making them faster to be written on or to have its data copied to other buffers
-    // cons: write only, we can use glReadPixels() to read from the currently bound frame buffer but
-    // not from the attachment itself
-    unsigned int RBO;
-    glGenRenderbuffers(1, &RBO);
-    glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-    /* Since renderbuffer objects are generally write-only they are often used as depth and stencil attachments,
-     * since most of the time we don't really need to read values from the depth and stencil buffers but still care about depth and stencil testing.
-     * We need the depth and stencil values for testing,
-     * but don't need to sample these values so a renderbuffer object suits this perfectly.
-     * When we're not sampling from these buffers, a renderbuffer object is generally preferred since it's more optimized. */
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
+    crank::TextureBuffer tbo(crank::TextureBuffer::COLOR);
+    tbo.Storage(width, height);
+    tbo.Unbind();
 
     // Framebuffer operations
-    unsigned int FBO;
-    glGenFramebuffers(1, &FBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, FBO); // GL_READ_FRAMEBUFFER, GL_DRAW_FRAMEBUFFER
+    crank::FrameBuffer fbo(crank::FrameBuffer::READ_DRAW);
+    fbo.Attach(rbo);
+    fbo.Attach(tbo);
+    fbo.Unbind();
 
-    glBindTexture(GL_TEXTURE_2D, fb_texture_rgb);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, fb_texture_rgb, 0);
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fb_texture_depth, 0);
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, fb_texture_stencil, 0);
-    //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, fb_texture_depth_stencil, 0);
-    glBindRenderbuffer(GL_RENDERBUFFER, RBO);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBO);
-
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    {
+    if(!fbo.Complete())
         LOGE << "FRAMEBUFFER: Framebuffer is not complete!";
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
 
     while (window.IsOpen())
     {
@@ -194,15 +137,14 @@ int main()
         lastFrame = currentFrame;
         process_input(&window, deltaTime);
 
-        // output fps: deltaTime * FPS = 1second
-        //std::cout << 1/deltaTime << '\n';
+
         FPSsum += 1/deltaTime;
         FPSsum_count += 1;
         // debugging
         //std::cout << "(" << camera.getPosition().x << ", " << camera.getPosition().y << ", " << camera.GetPosition().z << ")" <<std::endl;
 
-        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-        glDisable(GL_STENCIL_TEST);
+        fbo.Bind();
+
         glEnable(GL_DEPTH_TEST);
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -415,16 +357,18 @@ int main()
         glEnable(GL_DEPTH_TEST);
         glStencilFunc(GL_EQUAL, 0, 0xFF);*/
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        fbo.Unbind();
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_STENCIL_TEST);
         glClearColor(1.0, 1.0, 1.0, 1.0);
-        glClear( GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT );
+        glClear( GL_COLOR_BUFFER_BIT );
         screenQuadVao.Bind();
         screen_shader.Enable();
+
+        tbo.Bind();
         glActiveTexture(GL_TEXTURE0);
         screen_shader.SetInteger("texture1", 0);
-        glBindTexture(GL_TEXTURE_2D, fb_texture_rgb);
+        glBindTexture(GL_TEXTURE_2D, tbo.Id());
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         window.SwapBuffers();

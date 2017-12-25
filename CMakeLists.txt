@@ -14,7 +14,7 @@ include_directories(dependencies/GLFW/include/)
 include_directories(dependencies/GLM/include/)
 include_directories(dependencies/STB_IMAGE/include/)
 
-add_executable(${PROJECT_NAME} ${myCode})
+add_executable(${PROJECT_NAME} ${myCode} code/src/Buffers/FrameBuffer.cpp code/src/Buffers/FrameBuffer.h code/src/Buffers/RenderBuffer.cpp code/src/Buffers/RenderBuffer.h code/src/Buffers/TextureBuffer.cpp code/src/Buffers/TextureBuffer.h)
 ################# Detect and add OpenGL ########################
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})

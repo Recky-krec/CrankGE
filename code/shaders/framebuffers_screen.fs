@@ -22,8 +22,8 @@ void main()
 
     //grayscale
     //vec4 color = texture(texture1, fs_in.texCoords);
-    //fragColor = vec4(vec3( (color.r + color.g + color.b) / 3.0 ), color.a);
-    //fragColor = vec4(vec3( ( 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b) / 3.0 ), color.a);
+    //fragColor = vec4(vec3( (color.r + color.g + color.b) / 3.0 ), 1.0);
+    //fragColor = vec4(vec3( ( 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b) / 3.0 ), 1.0);
 
     //kernels
     const float offset = 1.0 / 300.0;
