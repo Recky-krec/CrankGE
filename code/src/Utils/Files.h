@@ -20,7 +20,7 @@ template<typename T>
 char* asBytes(T& var);
 
 unsigned int loadTexture(const std::string& path);
-
+unsigned int loadCubemap(const std::vector<std::string>& faces);
 
 
 

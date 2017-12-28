@@ -27,6 +27,7 @@
 #include "Utils/Debug.h"
 #include "Utils/Log.h"
 
+#include "Misc/Vector.h"
 #include "Misc/vertex_data.h"
 #include "Misc/core_runtime_functions.h"
 
@@ -52,20 +53,54 @@ int main()
     // Set callbacks
     glfwSetScrollCallback(window.GetWindowPtr(), scroll_callback);
 
+
+    // ----- TEST AREA ----
+    crank::Vector<float> v;
+
+    v.resize(10, 1.2345);
+    for(int i=0; i<v.size(); i++)
+        std::cout << v[i] << std::endl;
+
+    std::cout << v.capacity() << std::endl;
+
+    crank::Vector<float> v2 = v;
+    for(int i=0; i<v2.size(); i++)
+        std::cout << v2[i] << std::endl;
+
+    std::cout << v2.size() << std::endl;
+    std::cout << v2.capacity() << std::endl;
+
+
+
+
     // Load resources
     // shaders
-    crank::Shader border_shader = crank::ResourceManager::LoadShader("code/shaders/border.vs", "code/shaders/border.fs", nullptr, "border");
+    crank::Shader borderShader = crank::ResourceManager::LoadShader("code/shaders/border.vs", "code/shaders/border.fs", nullptr, "border");
     crank::Shader lamp_shader  = crank::ResourceManager::LoadShader("code/shaders/lamp.vs", "code/shaders/lamp.fs", nullptr, "lamp");
     crank::Shader model_shader = crank::ResourceManager::LoadShader("code/shaders/model_loading.vs", "code/shaders/model_loading.fs", nullptr, "nanosuit_model");
     crank::Shader screen_shader = crank::ResourceManager::LoadShader("code/shaders/framebuffers_screen.vs", "code/shaders/framebuffers_screen.fs", nullptr, "screen_shader");
     crank::Shader index_quad_shader = crank::ResourceManager::LoadShader("code/shaders/experimental/index_quad.vs", "code/shaders/experimental/index_quad.fs", nullptr, "index_quad");
-
+    crank::Shader skyboxShader = crank::ResourceManager::LoadShader("code/shaders/skybox.vs", "code/shaders/skybox.fs", nullptr, "skybox");
+    crank::Shader reflectiveCube = crank::ResourceManager::LoadShader("code/shaders/reflectiveCube.vs", "code/shaders/reflectiveCube.fs", nullptr, "reflectiveCube");
+    crank::Shader reflectiveModelShader = crank::ResourceManager::LoadShader("code/shaders/reflectiveModel.vs", "code/shaders/reflectiveModel.fs", nullptr, "reflectiveModel");
     // model
-    TIME(crank::Model ourModel("assets/sponza/sponza.obj"));
+    //TIME(crank::Model ourModel("assets/sponza/sponza.obj"));
+    TIME(crank::Model nanosuit("assets/nanosuit/nanosuit.obj"));
 
     // textures
     unsigned int box = crank::loadTexture("assets/earth.png");
     unsigned int red_window = crank::loadTexture("assets/blending_transparent_window.png");
+
+    std::vector<std::string> faces
+    {
+        "assets/skybox/lake/right.jpg",
+        "assets/skybox/lake/left.jpg",
+        "assets/skybox/lake/top.jpg",
+        "assets/skybox/lake/bottom.jpg",
+        "assets/skybox/lake/back.jpg",
+        "assets/skybox/lake/front.jpg",
+    };
+    unsigned int cubeMap = crank::loadCubemap(faces);
 
     // Buffers for cube with position, normal and texcoords
     crank::VertexArray cubeVao;
@@ -102,16 +137,25 @@ int main()
     screenQuadVao.AddBuffer(screenQuadVbo, sqLayout);
     screenQuadVao.Unbind();
 
-    // Simple test quad
-    crank::VertexArray testVao;
-    crank::VertexBuffer testVbo(test, sizeof(test));
-    crank::IndexBuffer testIbo(test_indices, 6);
-    crank::VertexBufferLayout tLayout;
-    tLayout.Push<float>(3);
-    testVao.AddBuffer(testVbo, tLayout);
-    testVao.Unbind();
+    // Skybox
+    crank::VertexArray skyboxVao;
+    crank::VertexBuffer skyboxVbo(skyboxVertices, sizeof(skyboxVertices));
+    crank::VertexBufferLayout sbLayout;
+    sbLayout.Push<float>(3);
+    skyboxVao.AddBuffer(skyboxVbo, sbLayout);
+    skyboxVao.Unbind();
 
-    
+    // Reflection Cube
+    crank::VertexArray reflectiveCubeVao;
+    crank::VertexBuffer reflectiveCubeVbo(normalCubeVertices, sizeof(normalCubeVertices));
+    crank::VertexBufferLayout rcLayout;
+    rcLayout.Push<float>(3); // position
+    rcLayout.Push<float>(3); // normals
+
+    reflectiveCubeVao.AddBuffer(reflectiveCubeVbo, rcLayout);
+    reflectiveCubeVao.Unbind();
+
+
     // Framebuffer operations
     crank::RenderBuffer rbo;
     rbo.Storage(width, height);
@@ -137,25 +181,33 @@ int main()
         lastFrame = currentFrame;
         process_input(&window, deltaTime);
 
-
         FPSsum += 1/deltaTime;
         FPSsum_count += 1;
         // debugging
         //std::cout << "(" << camera.getPosition().x << ", " << camera.getPosition().y << ", " << camera.GetPosition().z << ")" <<std::endl;
 
+
         fbo.Bind();
 
         glEnable(GL_DEPTH_TEST);
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glEnable(GL_STENCIL_TEST);
+        glEnable(GL_CULL_FACE);
+
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+
         glStencilMask(0x00); // make sure we don't update the stencil buffer while drawing the building
-        model_shader.Enable();
+
         glm::mat4 model;
+        glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), width / height, 0.1f, 100.0f);
+
+        // --- Mansion model ---
+        /*model_shader.Enable();
+
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
         model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// it's a bit too big for our scene, so scale it down
 
-        glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()), width / height, 0.1f, 100.0f);
 
         model_shader.SetMatrix4("model", model);
         model_shader.SetMatrix4("view", camera.GetViewMatrix());
@@ -196,31 +248,75 @@ int main()
         model_shader.SetInteger("spotLight.isLanternOn", isLanternOn);
 
         // Directional light
-        model_shader.SetVector3f("dirLight.direction", -0.2f, -1.0f, -0.3f);
+        model_shader.SetVector3f("dirLight.direction", -0.2f, -1.0f, 0.3f);
         model_shader.SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f);
         model_shader.SetVector3f("dirLight.diffuse", 0.50f, 0.50f, 0.50f);
         model_shader.SetVector3f("dirLight.specular", 1.0f, 1.0f, 1.0f);
 
         // Draw call
-        ourModel.Draw(model_shader);
+        ourModel.Draw(model_shader);*/
 
-        // ----------------------- test quad -------------------------
+        // --- Nanosuit ---
+        glDisable(GL_BLEND);
 
-        glDisable(GL_CULL_FACE);
-        index_quad_shader.Enable();
-        testVao.Bind();
         model = glm::mat4();
-        model = glm::translate(model, glm::vec3(1.5, 1.5, 1.5));
-        model = glm::scale(model, glm::vec3(2.0, 2.0, 2.0));
-        index_quad_shader.SetMatrix4("model", model);
-        index_quad_shader.SetMatrix4("view", camera.GetViewMatrix());
-        index_quad_shader.SetMatrix4("projection", projection);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glEnable(GL_CULL_FACE);
+        model = glm::translate(model, glm::vec3(1.0, 1.0, 1.0));
+        model = glm::scale(model, glm::vec3(0.1, 0.1, 0.1));
+
+        reflectiveModelShader.Enable();
+        reflectiveModelShader.SetMatrix4("model", model);
+        reflectiveModelShader.SetMatrix4("view", camera.GetViewMatrix());
+        reflectiveModelShader.SetMatrix4("projection", projection);
+        reflectiveModelShader.SetVector3f("viewPos", camera.GetPosition());
+        reflectiveModelShader.SetFloat("material.shininess", 32.0f);
+
+        // Point light 0
+        reflectiveModelShader.SetVector3f("pointLights[0].position", point_light_positions[0]);
+        reflectiveModelShader.SetVector3f("pointLights[0].ambient", 0.02f, 0.02f, 0.02f);
+        reflectiveModelShader.SetVector3f("pointLights[0].diffuse", 0.15f, 0.15f, 0.15f);
+        reflectiveModelShader.SetVector3f("pointLights[0].specular", 0.80f, 0.80f, 0.80f);
+        reflectiveModelShader.SetFloat("pointLights[0].constant", 1.0f);
+        reflectiveModelShader.SetFloat("pointLights[0].linear", 0.09f);
+        reflectiveModelShader.SetFloat("pointLights[0].quadratic", 0.032f);
+
+        // Point light 1
+        reflectiveModelShader.SetVector3f("pointLights[1].position", point_light_positions[1]);
+        reflectiveModelShader.SetVector3f("pointLights[1].ambient", 0.02f, 0.02f, 0.02f);
+        reflectiveModelShader.SetVector3f("pointLights[1].diffuse", 0.15f, 0.15f, 0.15f);
+        reflectiveModelShader.SetVector3f("pointLights[1].specular", 0.80f, 0.80f, 0.80f);
+        reflectiveModelShader.SetFloat("pointLights[1].constant", 1.0f);
+        reflectiveModelShader.SetFloat("pointLights[1].linear", 0.09f);
+        reflectiveModelShader.SetFloat("pointLights[1].quadratic", 0.032f);
+
+        // Spotlight 0
+        reflectiveModelShader.SetVector3f("spotLight.position", camera.GetPosition());
+        reflectiveModelShader.SetVector3f("spotLight.direction", camera.Front);
+        reflectiveModelShader.SetVector3f("spotLight.ambient", 0.01f, 0.01f, 0.01f);
+        reflectiveModelShader.SetVector3f("spotLight.diffuse", 0.4, 0.4f, 0.4f);
+        reflectiveModelShader.SetVector3f("spotLight.specular", 0.9f, 0.9f, 0.9f);
+        reflectiveModelShader.SetFloat("spotLight.innerCutOff", glm::cos(glm::radians(12.5f)));
+        reflectiveModelShader.SetFloat("spotLight.outerCutOff", glm::cos(glm::radians(17.5f)));
+        reflectiveModelShader.SetFloat("spotLight.constant", 1.0f);
+        reflectiveModelShader.SetFloat("spotLight.linear", 0.022f);
+        reflectiveModelShader.SetFloat("spotLight.quadratic", 0.0019f);
+        reflectiveModelShader.SetInteger("spotLight.isLanternOn", isLanternOn);
+
+        // Directional light
+        reflectiveModelShader.SetVector3f("dirLight.direction", -0.2f, -1.0f, 0.3f);
+        reflectiveModelShader.SetVector3f("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+        reflectiveModelShader.SetVector3f("dirLight.diffuse", 0.50f, 0.50f, 0.50f);
+        reflectiveModelShader.SetVector3f("dirLight.specular", 1.0f, 1.0f, 1.0f);
+
+        // Draw call
+        glActiveTexture(GL_TEXTURE3);
+        reflectiveModelShader.SetInteger("skybox", 3);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
+
+        nanosuit.Draw(reflectiveModelShader);
 
 
         // -------------- ON THE FIELD POINT LIGHT -----------------
-        border_shader.Enable();
+        borderShader.Enable();
 
         cubeVao.Bind();
 
@@ -230,14 +326,15 @@ int main()
             model = glm::translate(model, point_light_positions[i]);
             model = glm::scale(model, glm::vec3(0.15f, 0.15f, 0.15f));
 
-            border_shader.SetMatrix4("model", model);
-            border_shader.SetMatrix4("view", camera.GetViewMatrix());
-            border_shader.SetMatrix4("projection", projection);
+            borderShader.SetMatrix4("model", model);
+            borderShader.SetMatrix4("view", camera.GetViewMatrix());
+            borderShader.SetMatrix4("projection", projection);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
         // RED WINDOWS:
+        glEnable(GL_BLEND);
         glDisable(GL_CULL_FACE);
         cubeVao.Bind();
 
@@ -267,6 +364,21 @@ int main()
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
         glEnable(GL_CULL_FACE);
+
+        // ---- Reflective Cube ---
+        glDisable(GL_CULL_FACE);
+        reflectiveCube.Enable();
+        model = glm::mat4();
+        model = glm::translate(model, glm::vec3(5.0, 10.0, 0.0));
+        reflectiveCube.SetMatrix4("model", model);
+        reflectiveCube.SetMatrix4("view", camera.GetViewMatrix());
+        reflectiveCube.SetMatrix4("projection", projection);
+        reflectiveCube.SetVector3f("u_cameraPos", camera.GetPosition());
+        reflectiveCubeVao.Bind();
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        // ------------------------
+
 
 
 
@@ -356,6 +468,18 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glEnable(GL_DEPTH_TEST);
         glStencilFunc(GL_EQUAL, 0, 0xFF);*/
+
+        glEnable(GL_DEPTH_TEST);
+        skyboxShader.Enable();
+
+        glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // cuts out the translation properties of the matrix
+        skyboxShader.SetMatrix4("view", view);
+        skyboxShader.SetMatrix4("projection", projection);
+
+        skyboxVao.Bind();
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
 
         fbo.Unbind();
         glDisable(GL_DEPTH_TEST);

@@ -15,7 +15,7 @@ void main()
     // post processing effects
 
     //normal
-    //fragColor = texture(texture1, fs_in.texCoords);
+    fragColor = texture(texture1, fs_in.texCoords);
 
     //inversion
     //fragColor = vec4(1.0 - vec3(texture(texture1, fs_in.texCoords)), 1.0);
@@ -26,7 +26,7 @@ void main()
     //fragColor = vec4(vec3( ( 0.2126 * color.r + 0.7152 * color.g + 0.0722 * color.b) / 3.0 ), 1.0);
 
     //kernels
-    const float offset = 1.0 / 300.0;
+    /*const float offset = 1.0 / 300.0;
     vec2 offsets[9] = vec2[]
     (
         vec2(-offset,  offset), // top-left
@@ -76,6 +76,6 @@ void main()
 
     }
 
-    fragColor = vec4(color, 1.0);
+    fragColor = vec4(color, 1.0);*/
 
 }

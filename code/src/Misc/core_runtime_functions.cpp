@@ -69,7 +69,7 @@ void configure_opengl()
 {
     // DEPTH TESTING
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS); // Passes if the fragment's depth value is less than the stored depth value.
+    glDepthFunc(GL_LEQUAL); // Passes if the fragment's depth value is less than the stored depth value.
     //glDepthMask(GL_FALSE); // makes the depth buffer read only
 
     // STENCIL TESTING

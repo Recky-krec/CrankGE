@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall")
 
 project(CrankGE)
 
@@ -14,7 +14,7 @@ include_directories(dependencies/GLFW/include/)
 include_directories(dependencies/GLM/include/)
 include_directories(dependencies/STB_IMAGE/include/)
 
-add_executable(${PROJECT_NAME} ${myCode} code/src/Buffers/FrameBuffer.cpp code/src/Buffers/FrameBuffer.h code/src/Buffers/RenderBuffer.cpp code/src/Buffers/RenderBuffer.h code/src/Buffers/TextureBuffer.cpp code/src/Buffers/TextureBuffer.h)
+add_executable(${PROJECT_NAME} ${myCode} code/src/Misc/Vector.h) #code/src/Misc/Vector.inl)
 ################# Detect and add OpenGL ########################
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
