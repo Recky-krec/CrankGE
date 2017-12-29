@@ -1,9 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <algorithm>
 
 namespace crank
 {
+
+struct out_of_range {};
 
 template<typename T, typename A = std::allocator<T>> // requires Element<T>()
 class Vector
@@ -21,6 +24,9 @@ public:
     inline T& operator[](int n) { return m_elem[n]; }
     inline const T& operator[](int n) const { return m_elem[n]; }
 
+    T& at(int n);
+    const T& at(int n) const;
+
     void reserve(unsigned int newalloc);
     void resize (unsigned int newsize, T def = T());
     void push_back(T t);
@@ -29,10 +35,10 @@ public:
     inline unsigned int capacity() const { return m_space; }
 
 private:
+    A m_alloc;
+    T* m_elem;
     unsigned int m_sz;
     unsigned int m_space;
-    T* m_elem;
-    A m_alloc;
 };
 
 } // namespace crank

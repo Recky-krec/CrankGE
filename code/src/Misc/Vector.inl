@@ -75,10 +75,13 @@ template<typename T, typename A>
 void Vector<T, A>::reserve(unsigned int newalloc)
 {
     if(newalloc <= m_space) return;
-    auto* p = new T[newalloc];
-    for(int i = 0; i<m_sz; i++) p[i] = m_elem[i];
-    delete[] m_elem;
-    m_elem = p;
+    std::unique_ptr<T[]> p(m_alloc.allocate(newalloc));
+
+    for(int i = 0; i<m_sz; i++) m_alloc.construct(&p[i], m_elem[i]);
+    for(int i = 0; i<m_sz; i++) m_alloc.destroy(&m_elem[i]);
+
+    m_alloc.deallocate(m_elem, m_space);
+    m_elem = p.release();
     m_space = newalloc;
 }
 
@@ -87,21 +90,32 @@ template<typename T, typename A>
 void Vector<T, A>::resize(unsigned int newsize, T def)
 {
     reserve(newsize);
-    for(int i = m_sz; i<newsize; i++) m_elem[i] = def;
+    for(int i = m_sz; i<newsize; i++) m_alloc.construct(&m_elem[i], def);
+    for(int i = newsize; i<m_sz; i++) m_alloc.destroy(&m_elem[i]); // make memory uninitialized in case of resizing to lower
     m_sz = newsize;
 }
 
 template<typename T, typename A>
 void Vector<T, A>::push_back(T t)
 {
-    if(m_space == 0)
-        reserve(8);
-
-    else if(m_sz == m_space)
-        reserve(m_space * 2);
-
-    m_elem[m_sz] = t;
+    if(m_space == 0) reserve(8);
+    else if(m_sz == m_space) reserve(m_space * 2);
+    m_alloc.construct(&m_elem[m_sz], t);
     ++m_sz;
+}
+
+template<typename T, typename A>
+T& Vector<T, A>::at(int n)
+{
+    if(n<0 || m_sz<=n) throw out_of_range();
+    return m_elem[n];
+}
+
+template<typename T, typename A>
+const T& Vector<T, A>::at(int n) const
+{
+    if(n<0 || m_sz<=n) throw out_of_range();
+    return m_elem[n];
 }
 
 

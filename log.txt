@@ -1,7 +1,7 @@
 *======= CrankGE LOG =======*
 
 Level => logINFO
-	15:36:48 [TIME]:
-	15:36:48	Starting time: 0.0858018
-	15:36:48	Call to: 'crank::Model nanosuit("assets/nanosuit/nanosuit.obj")'
-	15:36:49	Ending time: 1.62193
+	19:45:43 [TIME]:
+	19:45:43	Starting time: 0.147593
+	19:45:43	Call to: 'crank::Model nanosuit("assets/nanosuit/nanosuit.obj")'
+	19:45:44	Ending time: 1.35055

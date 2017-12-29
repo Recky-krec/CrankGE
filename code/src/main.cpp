@@ -53,26 +53,6 @@ int main()
     // Set callbacks
     glfwSetScrollCallback(window.GetWindowPtr(), scroll_callback);
 
-
-    // ----- TEST AREA ----
-    crank::Vector<float> v;
-
-    v.resize(10, 1.2345);
-    for(int i=0; i<v.size(); i++)
-        std::cout << v[i] << std::endl;
-
-    std::cout << v.capacity() << std::endl;
-
-    crank::Vector<float> v2 = v;
-    for(int i=0; i<v2.size(); i++)
-        std::cout << v2[i] << std::endl;
-
-    std::cout << v2.size() << std::endl;
-    std::cout << v2.capacity() << std::endl;
-
-
-
-
     // Load resources
     // shaders
     crank::Shader borderShader = crank::ResourceManager::LoadShader("code/shaders/border.vs", "code/shaders/border.fs", nullptr, "border");
