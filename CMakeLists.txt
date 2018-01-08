@@ -14,7 +14,7 @@ include_directories(dependencies/GLFW/include/)
 include_directories(dependencies/GLM/include/)
 include_directories(dependencies/STB_IMAGE/include/)
 
-add_executable(${PROJECT_NAME} ${myCode})
+add_executable(${PROJECT_NAME} ${myCode} code/src/Utils/ObjLoader.cpp code/src/Utils/ObjLoader.h code/shaders/experimental/test_import.vs code/src/Misc/List.h)
 ################# Detect and add OpenGL ########################
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})

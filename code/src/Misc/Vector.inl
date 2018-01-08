@@ -14,6 +14,14 @@ Vector<T, A>::Vector(unsigned int sz)
     : m_sz(sz), m_space(sz), m_elem(new T[sz])
 {}
 
+template<typename T, typename A>
+Vector<T, A>::Vector(std::initializer_list<T> il)
+    : m_sz(), m_space(0), m_elem(nullptr)
+{
+    for(auto elem : il)
+        push_back(elem);
+};
+
 
 template<typename T, typename A>
 Vector<T, A>::Vector(const Vector<T, A>& v)
@@ -116,6 +124,39 @@ const T& Vector<T, A>::at(int n) const
 {
     if(n<0 || m_sz<=n) throw out_of_range();
     return m_elem[n];
+}
+
+template<typename T, typename A>
+typename Vector<T, A>::iterator Vector<T, A>::insert(Vector::iterator p, const T &val)
+{
+    int index = p - begin();
+
+    if(size() == capacity())
+        reserve(size()==0 ? 8: size()*2);
+
+    m_alloc.construct(end(), *(end()-1) ); // copy last element into unitialized space
+    ++m_sz;
+
+    iterator pp = begin() + index;
+
+    for(auto pos = end()-1; pos!=pp; --pos)
+        *pos = *(pos-1);
+
+    *pp = val;
+
+    return pp;
+}
+
+template<typename T, typename A>
+typename Vector<T, A>::iterator Vector<T, A>::erase(Vector::iterator p)
+{
+    if(p==end()) return p;
+    for(auto it = p+1; it!=end(); ++it)
+        *(it-1) = *it;  // copy elements one position to the left
+    m_alloc.destroy( end()-1 );
+
+    --m_sz;
+    return p;
 }
 
 

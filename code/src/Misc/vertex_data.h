@@ -176,6 +176,8 @@ glm::vec3 point_light_positions[] =
 {
     glm::vec3(0.0f,  3.0f, 2.0f),
     glm::vec3(2.3f, 0.7f, -2.2f),
+    glm::vec3(2.3f, 9.0f, -2.2f),
+
 };
 
 glm::vec3 cube_positions[] =

@@ -12,8 +12,27 @@ template<typename T, typename A = std::allocator<T>> // requires Element<T>()
 class Vector
 {
 public:
+    using iterator = T*; // random access iterator
+    using const_iterator = const T*;
+    using size_type = unsigned long;
+    using value_type = T;
+
+    /*template<typename C>
+    using Value_type = typename C::value_type;
+
+    template<typename C>
+    using Iterator = typename C::iterator;*/
+
+public:
+    inline iterator begin() { return m_elem; }
+    inline iterator end() { return m_elem + m_sz; }
+    inline const_iterator begin() const { return m_elem; }
+    inline const_iterator end() const { return m_elem + m_sz; }
+
+public:
     Vector();
     explicit Vector(unsigned int sz);
+    Vector(std::initializer_list<T> il);
     ~Vector();
 
     Vector(const Vector& v); // copy constructor
@@ -30,15 +49,17 @@ public:
     void reserve(unsigned int newalloc);
     void resize (unsigned int newsize, T def = T());
     void push_back(T t);
+    iterator insert(iterator p, const T& val);
+    iterator erase(iterator p);
 
-    inline unsigned int size() const { return m_sz; }
-    inline unsigned int capacity() const { return m_space; }
+    inline size_type size() const { return m_sz; }
+    inline size_type capacity() const { return m_space; }
 
 private:
     A m_alloc;
-    T* m_elem;
     unsigned int m_sz;
     unsigned int m_space;
+    T* m_elem;
 };
 
 } // namespace crank
